@@ -1,0 +1,23 @@
+{
+  "system": {
+    "project_name": "EmbeddedOrchestratedApp",
+    "version": "1.0.0",
+    "dashboard_api_port": 4040,
+    "environment": "development"
+  },
+  "automation": {
+    "auto_health_check": true,
+    "check_interval_minutes": 60,
+    "stage_diffs_for_review": true
+  },
+  "backup": {
+    "enabled": true,
+    "max_local_snapshots": 5,
+    "compression": "tar.gz",
+    "cloud_sync": {
+      "enabled": false,
+      "provider": "s3",
+      "bucket_target": ""
+    }
+  }
+}

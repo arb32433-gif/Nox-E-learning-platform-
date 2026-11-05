@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nox – Your progress</title>
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter+Tight:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0f14;--panel:#121a22;--panel2:#161f28;--line:#1f2b36;--ink:#dbe6dc;--mute:#8d9a94;--or:#ff5b35;--mint:#c6dac9;--good:#5fd4a6;--bad:#ff7a5c;color-scheme:dark;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 14px/1.5 "Inter Tight",system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+.disp{font-family:"Barlow Condensed","Arial Narrow",sans-serif}
+.app{display:grid;grid-template-columns:272px 1fr;min-height:100vh}
+
+/* sidebar */
+aside{border-right:1px solid var(--line);padding:24px 18px;display:flex;flex-direction:column;gap:22px;position:sticky;top:0;height:100vh;overflow:auto}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:22px;letter-spacing:-.03em;text-decoration:none;color:inherit}
+.brand img{width:28px;height:28px;object-fit:contain;transition:transform .3s ease}
+.brand:hover img{transform:scale(1.08)}
+.course{border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px;font-size:13px;background:var(--panel);transition:border-color .2s}
+.course:hover{border-color:var(--mint)}
+.course i{width:8px;height:8px;border-radius:50%;background:var(--or);flex:none}
+.course small{display:block;color:var(--mute);font-size:12px}
+nav{display:flex;flex-direction:column;gap:2px}
+nav .lbl,.sideh{font-size:12px;color:var(--mute);margin:0 0 6px 10px;display:flex;justify-content:space-between}
+nav a,nav button.nv{display:flex;align-items:center;gap:10px;color:var(--mute);padding:9px 10px;border-radius:6px;text-decoration:none;background:none;border:0;cursor:pointer;text-align:left;transition:background .2s,color .2s}
+nav a:hover,nav button.nv:hover{color:var(--ink);background:var(--panel)}
+nav a[aria-current=page]{background:var(--mint);color:var(--bg);font-weight:700}
+.mods{display:flex;flex-direction:column;gap:6px}
+.mod{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;cursor:pointer;text-align:left;transition:border-color .2s,transform .2s}
+.mod:hover{border-color:#2a3a47;transform:translateX(3px)}
+.mod[aria-pressed=true]{border-color:var(--or)}
+.mod .row{display:flex;justify-content:space-between;font-size:13px}
+.mod .row span:last-child{color:var(--mute);font-size:12px}
+.mini{height:4px;background:var(--line);border-radius:3px;margin-top:8px;overflow:hidden}
+.mini i{display:block;height:100%;background:var(--mint);width:0;transition:width 1s cubic-bezier(.2,.7,.2,1)}
+.note{margin-top:auto;font-size:12px;color:var(--mute);border-top:1px solid var(--line);padding-top:14px}
+
+/* main */
+main{padding:28px clamp(18px,3vw,40px) 60px;min-width:0}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+h1{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:clamp(40px,5vw,60px);line-height:.9;letter-spacing:.01em;margin:0;color:var(--mint)}
+.crumb{color:var(--mute);font-size:13px;margin-top:8px}
+.crumb b{color:var(--or);font-weight:600}
+.search{position:relative}
+.search input{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 14px 10px 36px;width:min(260px,70vw);transition:border-color .2s,box-shadow .2s}
+.search input:focus{outline:none;border-color:var(--mint);box-shadow:0 0 0 4px rgba(198,218,201,.1)}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--mute)}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:22px;transition:border-color .25s,transform .25s}
+.card.hov:hover{border-color:#2a3a47;transform:translateY(-2px)}
+.sect{display:flex;align-items:center;gap:14px;margin:38px 0 16px}
+.sect .ic{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);display:grid;place-items:center;color:var(--mint);flex:none}
+.sect .ic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.sect h2{margin:0;font-size:20px;letter-spacing:-.02em}
+.sect p{margin:2px 0 0;color:var(--mute);font-size:13px}
+.sect .right{margin-left:auto;font-size:13px;color:var(--mute)}
+.sect .right button{background:none;border:0;color:var(--ink);cursor:pointer;font-weight:600;padding:4px 6px;border-radius:6px}
+.sect .right button:hover{color:var(--or)}
+
+/* hero strip */
+.hero{display:grid;grid-template-columns:1.3fr repeat(4,1fr);padding:0;overflow:hidden}
+.hero>div{padding:22px 22px;border-left:1px solid var(--line);position:relative}
+.hero>div:first-child{border-left:0;display:flex;flex-direction:column;justify-content:center;gap:14px}
+.who{display:flex;gap:14px;align-items:center}
+.av{width:56px;height:56px;border-radius:50%;background:#1a242e;border:1px solid var(--line);display:grid;place-items:center;font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:28px;color:var(--mint);position:relative}
+.av::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:1px dashed rgba(255,91,53,.5);animation:spin 18s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.who b{font-family:"Barlow Condensed",sans-serif;font-size:30px;font-weight:600;line-height:1;display:block}
+.who small{color:var(--mute)}
+.hero .lab{color:var(--mute);font-size:12.5px;display:flex;align-items:center;gap:8px}
+.hero .lab svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.hero .num{font-family:"Barlow Condensed",sans-serif;font-size:52px;font-weight:600;line-height:1;margin-top:12px;color:var(--mint)}
+.hero .num sup{font-size:20px;color:var(--or);vertical-align:top;margin-left:2px}
+.hero .sub{font-size:12.5px;color:var(--mute);margin-top:6px}
+.up{color:var(--good);font-weight:700}
+.down{color:var(--bad);font-weight:700}
+.hero .sub .up,.hero .sub .down{font-size:12.5px}
+
+/* goals */
+.goals{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.goal h3{font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:28px;margin:0 0 6px;display:flex;align-items:center;gap:10px}
+.goal h3 svg{width:20px;height:20px;color:var(--or)}
+.goal p{color:var(--mute);font-size:13px;margin:0 0 18px}
+.meta{display:flex;justify-content:space-between;font-size:12.5px;color:var(--mute);margin-bottom:8px}
+.meta b{color:var(--ink);font-weight:600}
+.track{height:12px;background:#1d2933;border-radius:3px;position:relative;overflow:hidden}
+.track i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#9fb8a6,var(--mint));border-radius:3px;width:0;transition:width 1.2s cubic-bezier(.2,.7,.2,1)}
+.track .goalmark{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--or)}
+.pct{text-align:right;font-family:"Barlow Condensed",sans-serif;font-size:14px;color:var(--mint);margin-top:6px}
+.rec{margin-top:18px;font-size:12.5px;color:var(--mute);display:flex;align-items:center;gap:8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{border:1px solid var(--line);border-radius:20px;padding:5px 12px;font-size:12.5px;background:var(--panel2);color:var(--ink);cursor:pointer;transition:border-color .2s,color .2s,transform .2s}
+.chip:hover{border-color:var(--or);color:var(--or);transform:translateY(-1px)}
+
+/* skills */
+.skills{display:grid;grid-template-columns:1fr 1.25fr;gap:16px}
+@media(max-width:1100px){.skills{grid-template-columns:1fr}}
+.panelhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:13px;color:var(--mute);gap:10px;flex-wrap:wrap}
+.legend{display:flex;gap:14px}
+.legend button{background:none;border:0;cursor:pointer;color:var(--mute);display:flex;align-items:center;gap:7px;padding:2px 0}
+.legend button[aria-pressed=false]{opacity:.4}
+.legend i{width:9px;height:9px;border-radius:50%}
+.radar{width:100%;max-width:420px;margin:0 auto;display:block;overflow:visible}
+.radar .poly{transform-origin:200px 200px;transform:scale(0);transition:transform 1.1s cubic-bezier(.2,.8,.2,1),opacity .3s}
+.radar .poly.on{transform:scale(1)}
+.radar .hid{opacity:0}
+.radar text{fill:var(--mute);font:500 12px "Inter Tight",sans-serif}
+.radar .pt{transition:r .3s}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{background:var(--panel2);color:var(--mute);font-weight:500;text-align:left;padding:12px 14px;font-size:13px;border-bottom:1px solid var(--line)}
+td{padding:14px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr{transition:background .2s}
+tbody tr:hover{background:#151f28}
+tbody tr:last-child td{border-bottom:0}
+.sk{display:flex;align-items:center;gap:10px;font-weight:500}
+.sk svg{width:16px;height:16px;color:var(--mint);fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.sc{font-family:"Barlow Condensed",sans-serif;font-size:20px;font-weight:600}
+.mbar{display:flex;align-items:center;gap:10px;min-width:120px}
+.mbar .track{height:6px;flex:1}
+.mbar .track i{background:var(--or)}
+.mbar.ok .track i{background:var(--mint)}
+.tbl-wrap{overflow-x:auto}
+
+/* activity */
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.filters .chip[aria-pressed=true]{background:var(--mint);color:var(--bg);border-color:var(--mint);font-weight:700}
+.filters .sp{margin-left:auto;color:var(--mute);font-size:13px}
+.acts{display:grid;gap:12px}
+.act{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;opacity:0;transform:translateY(12px);transition:opacity .5s,transform .5s,border-color .25s}
+.act.in{opacity:1;transform:none}
+.act:hover{border-color:#2a3a47}
+.act-head{display:grid;grid-template-columns:1.1fr 1.6fr 1fr auto;align-items:center;gap:18px;padding:18px 22px;background:none;border:0;width:100%;text-align:left;cursor:pointer}
+.k{font-size:12px;color:var(--mute);display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.k svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.v{font-family:"Barlow Condensed",sans-serif;font-size:26px;font-weight:600;line-height:1}
+.title{font-family:"Barlow Condensed",sans-serif;font-size:24px;font-weight:600;line-height:1.05;letter-spacing:.005em}
+.type{display:inline-block;font-size:12px;color:var(--or);margin-top:4px}
+.chev{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--mute);transition:transform .35s,color .2s}
+.chev svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.act.open .chev{transform:rotate(180deg);color:var(--or)}
+.act-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .4s ease}
+.act.open .act-body{grid-template-rows:1fr}
+.act-body>div{overflow:hidden}
+.act-body .in2{padding:0 22px 20px;display:grid;grid-template-columns:1fr 1fr;gap:18px;border-top:1px dashed var(--line);padding-top:16px;margin:0 22px;padding-left:0;padding-right:0}
+.act-body .in2 p{margin:0;color:var(--mute);font-size:14px}
+.act-body .in2 b{color:var(--ink);font-weight:600;display:block;margin-bottom:4px;font-size:13px}
+.bar2{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-top:8px}
+.bar2 i{display:block;height:100%;background:var(--mint);width:0;transition:width .9s .2s}
+.status{font-size:12px;border-radius:20px;padding:3px 10px;border:1px solid var(--line);color:var(--mute);white-space:nowrap}
+.status.done{color:var(--good);border-color:rgba(95,212,166,.4)}
+.status.active{color:var(--or);border-color:rgba(255,91,53,.5);animation:pulse 2s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 5px rgba(255,91,53,0)}0%{box-shadow:0 0 0 0 rgba(255,91,53,.35)}}
+.empty{color:var(--mute);text-align:center;padding:30px;border:1px dashed var(--line);border-radius:12px;display:none}
+
+.next{display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center;padding:20px 22px;background:linear-gradient(120deg,var(--panel),#142230);border-color:#2b4150}
+.next .play{width:48px;height:48px;border-radius:50%;background:var(--or);display:grid;place-items:center;color:var(--bg);border:0;cursor:pointer;transition:transform .25s,box-shadow .3s}
+.next .play:hover{transform:scale(1.07);box-shadow:0 10px 26px -8px rgba(255,91,53,.6)}
+.next .play svg{width:18px;height:18px;margin-left:3px}
+.next h4{margin:0;font-family:"Barlow Condensed",sans-serif;font-size:26px;font-weight:600}
+.next p{margin:2px 0 0;color:var(--mute);font-size:13px}
+
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--mint);color:var(--bg);padding:11px 18px;border-radius:8px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .25s}
+
+@media(max-width:980px){
+.app{grid-template-columns:1fr}
+aside{position:static;height:auto}
+.hero{grid-template-columns:1fr 1fr}
+.hero>div:first-child{grid-column:1/-1;border-bottom:1px solid var(--line)}
+.hero>div{border-left:0;border-top:1px solid var(--line)}
+.act-head{grid-template-columns:1fr auto}
+.act-head>div:nth-child(3){display:none}
+.act-body .in2{grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<aside>
+  <a href="Nox – Learn to run AI agents.html" class="brand" title="Return to Nox home">
+    <img src="assets/nox-logo.png" alt="Nox Logo" width="28" height="28">
+    Nox
+  </a>
+  <a href="Nox – Agentic Orchestration e-learning (1).html" class="course" style="text-decoration:none;color:inherit;" title="Return to Course workspace">
+    <i></i><div>Agentic Orchestration<small>Self-paced · 9 lessons</small></div>
+  </a>
+
+  <nav aria-label="Workspace">
+    <div class="lbl">Navigation</div>
+    <a href="Nox – Agentic Orchestration e-learning (1).html" id="to-overview"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Overview</a>
+    <a href="Nox – Agentic Orchestration e-learning (1).html" id="to-modules"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2zM22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"/></svg>Modules</a>
+    <a href="Nox – Agentic Orchestration e-learning (1).html" id="to-practice"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M5 21V4m0 0h12l-2 4 2 4H5"/></svg>Practice</a>
+    <a href="Nox – Agentic Orchestration e-learning (1).html" id="to-board"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/></svg>Leaderboard</a>
+    <a href="Nox – Your progress.html" aria-current="page"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Progress</a>
+    <a href="Nox – Notes.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Notes</a>
+    <a href="Nox – Profile.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>My profile</a>
+  </nav>
+
+  <div>
+    <p class="sideh"><span>Modules</span><span id="modcount">3</span></p>
+    <div class="mods" id="mods"></div>
+  </div>
+
+  <div class="note">Click a module to filter your activity. Click again to clear.</div>
+</aside>
+
+<main>
+  <div class="top">
+    <div>
+      <h1>Your progress</h1>
+      <div class="crumb">Agentic Orchestration <span style="color:var(--mute)">·</span> <b id="crumbmod">All modules</b></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <a href="Nox – Agentic Orchestration e-learning (1).html" class="chip" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;">← Course</a>
+      <a href="Nox – Notes.html" class="chip" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;">Study Notes ↗</a>
+      <div class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="Search lessons…" aria-label="Search lessons">
+      </div>
+    </div>
+  </div>
+
+  <!-- learner strip -->
+  <section class="card hero" aria-label="Summary">
+    <div>
+      <div class="who">
+        <div class="av" id="prog-av">N</div>
+        <div><b id="prog-name">nightowl</b><small id="prog-sub">Your callsign · Self-paced beginner</small></div>
+      </div>
+      <div class="sub" id="prog-activity">Last active today · Streak 3 days</div>
+    </div>
+    <div>
+      <div class="lab"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h5"/></svg>Lessons done</div>
+      <div class="num"><span data-count="4">0</span><span style="font-size:24px;color:var(--mute)">/9</span></div>
+      <div class="sub">44% of the course</div>
+    </div>
+    <div>
+      <div class="lab"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>Overall score</div>
+      <div class="num"><span data-count="82">0</span></div>
+      <div class="sub"><span class="up">↑ 16</span> this week</div>
+    </div>
+    <div>
+      <div class="lab"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M17 11a3 3 0 1 0 0-6M22 21a6 6 0 0 0-4-5.6"/></svg>Vs. cohort</div>
+      <div class="num"><span class="up">+<span data-count="13">0</span></span></div>
+      <div class="sub">Cohort average: 69</div>
+    </div>
+    <div>
+      <div class="lab"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Percentile</div>
+      <div class="num"><span data-count="80">0</span><sup>th</sup></div>
+      <div class="sub">Top 20% of learners</div>
+    </div>
+  </section>
+
+  <!-- goals -->
+  <div class="sect">
+    <div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg></div>
+    <div><h2>Goals</h2><p>Focused targets to guide your next steps</p></div>
+  </div>
+  <div class="goals" id="goals"></div>
+
+  <!-- skills -->
+  <div class="sect">
+    <div class="ic"><svg viewBox="0 0 24 24"><path d="M4 20l6-6M14 4l6 6M10 14l-4-4 6-6 4 4z"/></svg></div>
+    <div><h2>Skills</h2><p>Where you’re strong and where to focus</p></div>
+  </div>
+  <div class="skills">
+    <div class="card">
+      <div class="panelhead"><span>Graph</span>
+        <div class="legend">
+          <button id="lg-you" aria-pressed="true"><i style="background:var(--mint)"></i>You</button>
+          <button id="lg-cohort" aria-pressed="true"><i style="background:var(--or)"></i>Cohort avg</button>
+        </div>
+      </div>
+      <svg class="radar" id="radar" viewBox="0 0 400 400" role="img" aria-label="Skill radar: you versus cohort average"></svg>
+    </div>
+    <div class="card" style="padding:0">
+      <div class="panelhead" style="padding:18px 22px 0"><span>Breakdown</span><span>Score · change · vs cohort</span></div>
+      <div class="tbl-wrap" style="padding:12px 0 0"><table>
+        <thead><tr><th>Skill</th><th>Score</th><th>vs cohort</th><th>Mastery</th></tr></thead>
+        <tbody id="skillrows"></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- activity -->
+  <div class="sect">
+    <div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></div>
+    <div><h2>Lessons &amp; activity</h2><p>Your work history, with feedback on each lesson</p></div>
+    <div class="right"><button id="expandall">Expand all</button></div>
+  </div>
+
+  <div class="card next" id="next" style="margin-bottom:14px"></div>
+
+  <div class="filters" id="filters">
+    <button class="chip" data-f="all" aria-pressed="true">All</button>
+    <button class="chip" data-f="done" aria-pressed="false">Done</button>
+    <button class="chip" data-f="active" aria-pressed="false">In progress</button>
+    <button class="chip" data-f="todo" aria-pressed="false">Up next</button>
+    <span class="sp" id="count"></span>
+  </div>
+  <div class="acts" id="acts"></div>
+  <div class="empty" id="empty">No lessons match that search.</div>
+</main>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const MODS=[
+ {t:"Foundations & handoffs",n:4},
+ {t:"Advanced deployment",n:2},
+ {t:"Going further",n:3}];
+
+const LESSONS=[
+ {id:"1.1",t:"Agentic foundations & tool use",m:0,type:"Lesson",score:88,date:"Oct 28",status:"done",
+  note:"Strong on the plan–act–check loop. Next, name concrete tools your agent would call."},
+ {id:"1.2",t:"Multi-agent handoffs",m:0,type:"Try it",score:81,date:"Oct 30",status:"done",
+  note:"Your brief had the goal and next step. Add what is already finished so the next agent doesn’t repeat work."},
+ {id:"1.3",t:"Model Context Protocol (MCP)",m:0,type:"Lesson",score:76,date:"Nov 1",status:"done",
+  note:"Good permission map. Start read-only and widen access once you trust the output."},
+ {id:"1.4",t:"Supervisor & worker patterns",m:0,type:"Lesson",score:null,date:"",status:"active",
+  note:"Break a project into five subtasks. Pick the one you would hand to a worker first."},
+ {id:"2.1",t:"Guardrails & AI safety",m:1,type:"Lesson",score:84,date:"Nov 3",status:"done",
+  note:"Three clear never-rules. Add a logging step so mistakes can be traced."},
+ {id:"2.2",t:"Human-in-the-loop",m:1,type:"Lesson",score:null,date:"",status:"todo",
+  note:"Choose one action that always needs approval and one that can run unattended."},
+ {id:"3.1",t:"Memory & context",m:2,type:"Lesson",score:null,date:"",status:"todo",
+  note:"List three facts an agent should remember, and one it should forget."},
+ {id:"3.2",t:"Testing & monitoring",m:2,type:"Try it",score:null,date:"",status:"todo",
+  note:"Write five test inputs and the output you expect for each."},
+ {id:"3.3",t:"Ship your first workflow",m:2,type:"Mission",score:null,date:"",status:"todo",
+  note:"Write the workflow in five steps and mark the approval step."}];
+
+const SKILLS=[
+ {n:"Tool use",v:84,c:70,i:"M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"},
+ {n:"Handoffs",v:72,c:65,i:"M7 7h11l-3-3M17 17H6l3 3"},
+ {n:"MCP",v:68,c:60,i:"M9 3v6M15 3v6M7 9h10v3a5 5 0 0 1-10 0z"},
+ {n:"Guardrails",v:80,c:68,i:"M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"},
+ {n:"Memory",v:40,c:62,i:"M12 3a9 9 0 1 0 9 9M12 7v5l3 2"},
+ {n:"Testing",v:30,c:58,i:"M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"}];
+
+const GOALS=[
+ {t:"Tool fluency",d:"Connect agents to the apps you use, starting with read-only access.",start:60,now:76,goal:90,rec:["Practice Drill","Model Text"],mod:0},
+ {t:"Safe deployment",d:"Set guardrails and approval steps before any agent acts for you.",start:70,now:84,goal:90,rec:["Masterclass","Practice Drill"],mod:1},
+ {t:"Ship a workflow",d:"Run one agent team end to end on a real task of yours.",start:20,now:34,goal:90,rec:["Masterclass","Mission"],mod:2}];
+
+const pad=n=>String(n).padStart(2,"0");
+let modFilter=-1,statusFilter="all",query="",cohortOn=true,youOn=true;
+const $=s=>document.querySelector(s);
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const ICON={lesson:"M4 4h16v16H4zM8 9h8M8 13h5",done:"M5 12l5 5 9-10"};
+
+// Platform session sync (nox-v2 & nox-portal)
+let S={name:"nightowl",user:"",done:["1.1","1.2","1.3","2.1"]};
+try{
+  const nv=JSON.parse(localStorage.getItem("nox-v2")||"null");
+  if(nv){
+    if(nv.name)S.name=nv.name;
+    if(nv.user)S.user=nv.user;
+    if(Array.isArray(nv.done)&&nv.done.length>0)S.done=nv.done;
+  }
+  const portal=JSON.parse(localStorage.getItem("nox-portal")||"null");
+  if(portal&&portal.session&&portal.session>Date.now()&&portal.user){
+    if(!S.user)S.user=portal.user;
+    if(!S.name)S.name=portal.user.split("@")[0];
+  }
+}catch(e){}
+
+// Apply user state to learner strip
+if(S.name){
+  const avEl=$("#prog-av"),nmEl=$("#prog-name"),subEl=$("#prog-sub");
+  if(avEl)avEl.textContent=(S.name[0]||"N").toUpperCase();
+  if(nmEl)nmEl.textContent=S.name;
+  if(subEl)subEl.textContent=S.user?S.user+" · Beginner":"Your callsign · Beginner";
+}
+
+// Sync completed lessons with S.done
+if(Array.isArray(S.done)&&S.done.length>0){
+  LESSONS.forEach(l=>{
+    if(S.done.includes(l.id)){
+      l.status="done";
+      if(!l.score)l.score=86;
+    }
+  });
+  const dCount=LESSONS.filter(l=>l.status==="done").length;
+  const dEl=document.querySelector('[data-count="4"]');
+  if(dEl)dEl.dataset.count=dCount;
+}
+
+function toast(m){const t=$("#toast");t.textContent=m;t.style.opacity=1;clearTimeout(toast.k);toast.k=setTimeout(()=>t.style.opacity=0,1800)}
+
+/* modules sidebar */
+function renderMods(){
+ $("#mods").innerHTML=MODS.map((m,i)=>{const ls=LESSONS.filter(l=>l.m===i),d=ls.filter(l=>l.status==="done").length,p=Math.round(d/ls.length*100);
+  return `<button class="mod" data-mod="${i}" aria-pressed="${modFilter===i}"><div class="row"><span>MOD_${pad(i+1)} · ${m.t}</span><span>${d}/${ls.length}</span></div><div class="mini"><i data-w="${p}"></i></div></button>`}).join("");
+ const crumb=$("#crumbmod");crumb.textContent=modFilter<0?"All modules":`Module ${modFilter+1} · ${MODS[modFilter].t}`;
+ requestAnimationFrame(()=>document.querySelectorAll("[data-w]").forEach(el=>el.style.width=el.dataset.w+"%"));
+}
+
+/* goals */
+function renderGoals(){
+ $("#goals").innerHTML=GOALS.map(g=>`<div class="card hov goal"><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>${g.t}</h3><p>${g.d}</p>
+  <div class="meta"><span>Start <b>${g.start}</b></span><span>Goal <b>${g.goal}</b></span></div>
+  <div class="track"><i data-w="${g.now}"></i><span class="goalmark" style="left:${g.goal}%"></span></div>
+  <div class="pct">${g.now}% <span style="color:var(--mute)">· toward goal</span></div>
+  <div class="rec">→ Recommended</div>
+  <div class="chips">${g.rec.map(r=>`<button class="chip" data-go="${g.mod}">${r}</button>`).join("")}</div></div>`).join("");
+ requestAnimationFrame(()=>document.querySelectorAll("#goals [data-w]").forEach(el=>el.style.width=el.dataset.w+"%"));
+}
+
+/* radar */
+function radar(){
+ const svg=$("#radar"),cx=200,cy=200,R=140,n=SKILLS.length;
+ const ang=i=>(-90+i*360/n)*Math.PI/180;
+ const pt=(i,v)=>[cx+Math.cos(ang(i))*R*v/100,cy+Math.sin(ang(i))*R*v/100];
+ const poly=vals=>vals.map((v,i)=>pt(i,v).map(x=>x.toFixed(1)).join(",")).join(" ");
+ let g="";
+ [25,50,75,100].forEach(r=>{g+=`<polygon points="${poly(Array(n).fill(r))}" fill="none" stroke="#1f2b36" stroke-width="1"/>`});
+ SKILLS.forEach((s,i)=>{const [x,y]=pt(i,100);g+=`<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#1f2b36"/>`;
+  const [lx,ly]=pt(i,118);const anchor=Math.abs(lx-cx)<6?"middle":lx>cx?"start":"end";
+  g+=`<text x="${lx.toFixed(1)}" y="${(ly+4).toFixed(1)}" text-anchor="${anchor}">${s.n}</text>`});
+ g+=`<g class="poly ${cohortOn?"on":""}" style="${cohortOn?"":""}" id="pc"><polygon points="${poly(SKILLS.map(s=>s.c))}" fill="rgba(255,91,53,.08)" stroke="#ff5b35" stroke-width="1.5" stroke-dasharray="5 5"/></g>`;
+ g+=`<g class="poly ${youOn?"on":""}" id="py"><polygon points="${poly(SKILLS.map(s=>s.v))}" fill="rgba(198,218,201,.14)" stroke="#c6dac9" stroke-width="2"/>`;
+ SKILLS.forEach((s,i)=>{const [x,y]=pt(i,s.v);g+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4" fill="#c6dac9"><title>${s.n}: ${s.v}</title></circle>`});
+ g+=`</g>`;
+ svg.innerHTML=g;
+ svg.querySelector("#py").style.transformOrigin="200px 200px";
+ svg.querySelector("#pc").style.transformOrigin="200px 200px";
+ if(reduce)svg.querySelectorAll(".poly").forEach(p=>p.classList.add("on"));
+ else requestAnimationFrame(()=>requestAnimationFrame(()=>svg.querySelectorAll(".poly").forEach(p=>p.classList.add("on"))));
+ svg.querySelector("#py").style.display=youOn?"":"none";
+ svg.querySelector("#pc").style.display=cohortOn?"":"none";
+}
+
+/* breakdown */
+function renderSkills(){
+ $("#skillrows").innerHTML=SKILLS.map(s=>{const diff=s.v-s.c,ok=diff>=0;
+  return `<tr><td><div class="sk">${`<svg viewBox="0 0 24 24"><path d="${s.i}"/></svg>`}${s.n}</div></td>
+  <td><span class="sc">${s.v}</span></td>
+  <td><span class="${ok?"up":"down"}">${ok?"+":""}${diff}</span></td>
+  <td><div class="mbar ${s.v>=80?"ok":""}"><div class="track"><i data-w="${s.v}"></i></div><span style="font-size:13px;color:var(--mute);width:38px;text-align:right">${s.v}%</span></div></td></tr>`}).join("");
+ requestAnimationFrame(()=>document.querySelectorAll("#skillrows [data-w]").forEach(el=>el.style.width=el.dataset.w+"%"));
+}
+
+/* next up */
+function renderNext(){
+ const n=LESSONS.find(l=>l.status==="active")||LESSONS.find(l=>l.status==="todo");
+ $("#next").innerHTML=`<button class="play" data-open="${n.id}" aria-label="Continue lesson ${n.id}"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 4l14 8-14 8z"/></svg></button>
+  <div><div class="k">Continue · Lesson ${n.id} · MOD_${pad(n.m+1)}</div><h4>${n.t}</h4><p>${n.note}</p></div>
+  <button class="chip" data-open="${n.id}">Resume</button>`;
+}
+
+/* activity list */
+function visible(){return LESSONS.filter(l=>(modFilter<0||l.m===modFilter)&&(statusFilter==="all"||l.status===statusFilter)&&(!query||l.t.toLowerCase().includes(query)||l.note.toLowerCase().includes(query)))}
+function renderActs(){
+ const list=visible();
+ $("#acts").innerHTML=list.map((l,i)=>{const st=l.status==="done"?`<span class="status done">Done</span>`:l.status==="active"?`<span class="status active">In progress</span>`:`<span class="status">Up next</span>`;
+  const scoreHtml=l.score!=null?`<div class="v" style="color:var(--mint)">${l.score}</div>`:`<div class="v" style="color:var(--mute)">—</div>`;
+  return `<article class="act" data-id="${l.id}" style="transition-delay:${i*0.05}s">
+   <button class="act-head" aria-expanded="false">
+    <div><div class="k">MOD_${pad(l.m+1)} · Lesson ${l.id}</div><div class="title">${l.t}</div><span class="type">${l.type}</span></div>
+    <div><div class="k">Feedback</div><div style="color:var(--mute);font-size:13px;line-height:1.4;max-width:46ch">${l.note}</div></div>
+    <div><div class="k">Score</div>${scoreHtml}</div>
+    <div style="display:flex;align-items:center;gap:12px">${st}<span class="chev"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span></div>
+   </button>
+   <div class="act-body"><div><div class="in2">
+     <div><b>Progress</b><p>${l.status==="done"?"Completed. You can review the lesson any time.":l.status==="active"?"Started. Finish the try-it exercise to complete this lesson.":"Not started. Complete the earlier lessons in this module first."}</p><div class="bar2"><i data-w="${l.status==="done"?100:l.status==="active"?45:0}"></i></div></div>
+     <div><b>Next step</b><p>${l.note}</p><div style="margin-top:12px"><button class="chip" data-open="${l.id}">${l.status==="done"?"Review lesson":"Open lesson"}</button></div></div>
+   </div></div></div>
+  </article>`}).join("");
+ $("#empty").style.display=list.length?"none":"block";
+ $("#count").textContent=`${list.length} of ${LESSONS.length} lessons`;
+ requestAnimationFrame(()=>requestAnimationFrame(()=>document.querySelectorAll(".act").forEach(a=>a.classList.add("in"))));
+}
+
+/* count-up numbers */
+function countUp(){document.querySelectorAll("[data-count]").forEach(el=>{const t=+el.dataset.count;if(reduce){el.textContent=t;return}
+ let n=0;const step=Math.max(1,Math.ceil(t/24));const tick=()=>{n=Math.min(t,n+step);el.textContent=n;if(n<t)setTimeout(tick,28)};tick()})}
+
+/* events */
+document.addEventListener("click",e=>{
+ const m=e.target.closest("[data-mod]");if(m){const i=+m.dataset.mod;modFilter=modFilter===i?-1:i;renderMods();renderActs();return}
+ const g=e.target.closest("[data-go]");if(g){modFilter=+g.dataset.go;renderMods();renderActs();document.querySelector("#filters").scrollIntoView({behavior:"smooth",block:"center"});return}
+ const f=e.target.closest("#filters .chip");if(f){statusFilter=f.dataset.f;document.querySelectorAll("#filters .chip").forEach(c=>c.setAttribute("aria-pressed",c===f));renderActs();return}
+ const o=e.target.closest("[data-open]");if(o){
+  const id=o.dataset.open;
+  try{
+    let nv=JSON.parse(localStorage.getItem("nox-v2")||"{}");
+    nv.v="lesson";
+    nv.k=id;
+    const l=LESSONS.find(x=>x.id===id);
+    if(l)nv.m=l.m;
+    localStorage.setItem("nox-v2",JSON.stringify(nv));
+  }catch(err){}
+  toast("Opening lesson "+id+" in Course…");
+  setTimeout(()=>{location.href="Nox – Agentic Orchestration e-learning (1).html"},180);
+  return;
+ }
+ const h=e.target.closest(".act-head");if(h){const a=h.parentElement,open=a.classList.toggle("open");h.setAttribute("aria-expanded",open);
+  if(open)requestAnimationFrame(()=>a.querySelectorAll("[data-w]").forEach(el=>el.style.width=el.dataset.w+"%"));return}
+ if(e.target.closest("#expandall")){const all=[...document.querySelectorAll(".act")],allOpen=all.every(a=>a.classList.contains("open"));
+  all.forEach(a=>{a.classList.toggle("open",!allOpen);a.querySelector(".act-head").setAttribute("aria-expanded",!allOpen)});
+  $("#expandall").textContent=allOpen?"Expand all":"Collapse all";
+  if(!allOpen)requestAnimationFrame(()=>document.querySelectorAll(".act [data-w]").forEach(el=>el.style.width=el.dataset.w+"%"));return}
+});
+$("#q").addEventListener("input",e=>{query=e.target.value.trim().toLowerCase();renderActs()});
+$("#lg-you").addEventListener("click",e=>{youOn=!youOn;e.currentTarget.setAttribute("aria-pressed",youOn);radar()});
+$("#lg-cohort").addEventListener("click",e=>{cohortOn=!cohortOn;e.currentTarget.setAttribute("aria-pressed",cohortOn);radar()});
+
+const setCourseView=v=>{
+  try{
+    let nv=JSON.parse(localStorage.getItem("nox-v2")||"{}");
+    nv.v=v;
+    localStorage.setItem("nox-v2",JSON.stringify(nv));
+  }catch(e){}
+};
+$("#to-overview")?.addEventListener("click",()=>setCourseView("overview"));
+$("#to-modules")?.addEventListener("click",()=>setCourseView("modules"));
+$("#to-practice")?.addEventListener("click",()=>setCourseView("practice"));
+$("#to-board")?.addEventListener("click",()=>setCourseView("board"));
+
+/* first paint */
+renderMods();renderGoals();radar();renderSkills();renderNext();renderActs();countUp();
+</script>
+</body>
+</html>

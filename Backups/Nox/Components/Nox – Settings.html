@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nox – Settings</title>
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter+Tight:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0f14;--panel:#121a22;--panel2:#161f28;--line:#1f2b36;--ink:#dbe6dc;--mute:#8d9a94;--dim:#5d6b64;--or:#ff5b35;--mint:#c6dac9;--good:#5fd4a6;--err:#ff7a5c;--track:#1d2933;--field:#0b0f14;color-scheme:dark;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html[data-theme="light"]{--bg:#f3f5f2;--panel:#ffffff;--panel2:#f7f9f6;--line:#dde4de;--ink:#15201a;--mute:#5b6861;--dim:#7a877f;--or:#e5461f;--mint:#2d5a48;--good:#16855c;--err:#c2412a;--track:#e3e9e4;--field:#f7f9f6;color-scheme:light}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 14px/1.55 "Inter Tight",system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh;overflow-x:hidden;padding-bottom:96px}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+.disp{font-family:"Barlow Condensed","Arial Narrow",sans-serif}
+.wrap{max-width:1080px;margin:0 auto;padding:28px clamp(18px,4vw,40px) 40px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:26px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;letter-spacing:-.03em;color:var(--ink);text-decoration:none}
+.brand img{width:26px;height:26px;object-fit:contain;transition:transform .3s ease}
+.brand:hover img{transform:scale(1.08)}
+.back{background:none;border:1px solid var(--line);border-radius:8px;padding:8px 14px;color:var(--mute);cursor:pointer;transition:color .2s,border-color .2s}
+.back:hover{color:var(--ink);border-color:var(--mute)}
+h1{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:clamp(40px,5vw,56px);line-height:.95;margin:0 0 6px;color:var(--mint)}
+.lede{color:var(--mute);margin:0 0 26px}
+.layout{display:grid;grid-template-columns:200px 1fr;gap:28px;align-items:start}
+nav{position:sticky;top:20px;display:grid;gap:2px}
+nav a{color:var(--mute);text-decoration:none;padding:8px 12px;border-radius:8px;font-size:14px;transition:color .2s,background .2s}
+nav a:hover{color:var(--ink);background:var(--panel)}
+nav a.on{color:var(--ink);background:var(--panel);box-shadow:inset 3px 0 0 var(--or)}
+nav a.danger{color:var(--err)}
+.sec{scroll-margin-top:24px;margin-bottom:26px}
+.sec>header h2{margin:0;font-size:20px;letter-spacing:-.02em}
+.sec>header p{margin:2px 0 12px;color:var(--mute);font-size:13px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:6px 24px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:16px 0;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.row .t{min-width:0}
+.row .t b{display:block;font-weight:600}
+.row .t span{color:var(--mute);font-size:13px}
+.row .ctl{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.row.stack{flex-direction:column;align-items:stretch}
+.row.stack .ctl{justify-content:flex-start}
+.err{color:var(--err);font-size:12.5px;min-height:0}
+.err:empty{display:none}
+.ro{color:var(--mute);font-size:13.5px}
+input[type=text],input[type=time],input[type=email],select{background:var(--field);border:1px solid var(--line);border-radius:8px;padding:9px 12px;transition:border-color .2s,box-shadow .2s}
+input[type=text]{width:220px}
+input[type=text]:focus,input[type=time]:focus,select:focus{outline:none;border-color:var(--mint);box-shadow:0 0 0 4px rgba(198,218,201,.1)}
+input[aria-invalid=true]{border-color:var(--err)!important}
+.btn{background:var(--or);color:#0b0f14;border:0;border-radius:8px;padding:9px 16px;font-weight:700;cursor:pointer;transition:transform .2s,box-shadow .3s;white-space:nowrap}
+.btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 10px 24px -10px rgba(255,91,53,.6)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+.btn.ghost:hover:not(:disabled){box-shadow:inset 0 0 0 1px var(--mint)}
+.btn.danger{background:var(--err);color:#0b0f14}
+.sw{width:44px;height:24px;border-radius:20px;background:var(--track);border:0;position:relative;cursor:pointer;flex:none;transition:background .25s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--mute);transition:transform .25s,background .25s}
+.sw[aria-checked="true"]{background:var(--mint)}
+.sw[aria-checked="true"]::after{transform:translateX(20px);background:var(--bg)}
+.seg{display:inline-flex;background:var(--field);border:1px solid var(--line);border-radius:10px;padding:3px;position:relative}
+.seg label{position:relative;cursor:pointer}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg span{display:block;padding:7px 14px;border-radius:7px;color:var(--mute);transition:background .2s,color .2s;white-space:nowrap}
+.seg input:checked+span{background:var(--mint);color:var(--bg);font-weight:600}
+.seg input:focus-visible+span{outline:2px solid var(--mint);outline-offset:2px}
+.pill{font-size:12px;color:var(--good);border:1px solid currentColor;border-radius:20px;padding:1px 9px;margin-left:8px;font-weight:600}
+.pill.off{color:var(--dim)}
+.sess{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line);font-size:13.5px}
+.sess:first-child{border-top:0}
+.sess span{color:var(--mute);font-size:12.5px}
+.danger-card{border-color:rgba(255,122,92,.35)}
+.danger-card .row:first-child{padding-top:16px}
+.savebar{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);transform:translateY(110%);transition:transform .3s cubic-bezier(.2,.8,.2,1);z-index:20;padding-bottom:env(safe-area-inset-bottom,0px)}
+.savebar.on{transform:none}
+.savebar .in{max-width:1080px;margin:0 auto;padding:14px clamp(18px,4vw,40px);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.savebar .msg{color:var(--mute);font-size:13.5px}
+.savebar .msg b{color:var(--or)}
+.savebar .acts{display:flex;gap:10px}
+dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:0;width:min(440px,92vw);box-shadow:0 30px 80px rgba(0,0,0,.5)}
+dialog::backdrop{background:rgba(5,8,12,.7);backdrop-filter:blur(3px)}
+dialog[open]{animation:pop .3s cubic-bezier(.3,1.3,.5,1)}
+@keyframes pop{from{opacity:0;transform:translateY(16px) scale(.96)}to{opacity:1;transform:none}}
+dialog form{padding:26px;display:grid;gap:14px}
+dialog h3{font-family:"Barlow Condensed",sans-serif;font-size:30px;font-weight:600;margin:0;color:var(--mint)}
+dialog p{margin:0;color:var(--mute);font-size:13.5px}
+dialog label{display:grid;gap:6px;font-size:13px;color:var(--mute)}
+dialog input{width:100%}
+dialog .foot{display:flex;justify-content:flex-end;gap:10px;margin-top:4px}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--mint);color:var(--bg);padding:11px 18px;border-radius:8px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .25s;z-index:30;white-space:nowrap}
+@media(max-width:800px){
+ .layout{grid-template-columns:1fr;gap:12px}
+ nav{position:sticky;top:0;z-index:5;background:var(--bg);margin:0 calc(-1*clamp(18px,4vw,40px));padding:8px clamp(18px,4vw,40px);grid-auto-flow:column;overflow-x:auto;gap:4px;scrollbar-width:none}
+ nav a{white-space:nowrap}
+ .row{flex-direction:column;align-items:stretch}
+ .row .ctl{justify-content:flex-start}
+ input[type=text]{width:100%}
+}
+.rm *,.rm *::before,.rm *::after{transition:none!important;animation:none!important}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <a class="brand" href="Nox – Agentic Orchestration e-learning (1).html" title="Return to Nox workspace">
+      <img src="assets/nox-logo.png" alt="Nox Logo" width="26" height="26">
+      Nox
+    </a>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <a href="Nox – Agentic Orchestration e-learning (1).html" class="back" style="text-decoration:none;">← Course</a>
+      <a href="Nox – Your progress.html" class="back" style="text-decoration:none;">Progress</a>
+      <button class="back" id="back">← Back to profile</button>
+    </div>
+  </div>
+
+  <h1>Settings</h1>
+  <p class="lede">Account, privacy, notifications and how Nox works for you.</p>
+
+  <div class="layout">
+    <nav aria-label="Settings sections">
+      <a href="#account" class="on">Account</a>
+      <a href="#privacy">Privacy</a>
+      <a href="#notifications">Notifications</a>
+      <a href="#learning">Learning</a>
+      <a href="#appearance">Appearance</a>
+      <a href="#data">Data & security</a>
+      <a href="#danger" class="danger">Delete account</a>
+    </nav>
+
+    <main>
+      <section class="sec" id="account">
+        <header><h2>Account</h2><p>How you appear across Nox</p></header>
+        <div class="card">
+          <div class="row stack">
+            <div class="t"><b>Callsign</b><span>3–16 letters, numbers, - or _. Shown on the leaderboard.</span></div>
+            <div class="ctl" style="justify-content:space-between">
+              <input type="text" id="name" data-key="name" maxlength="16" autocomplete="off" aria-describedby="nerr" aria-label="Callsign">
+              <span class="ro" id="previewName"></span>
+            </div>
+            <div class="err" id="nerr"></div>
+          </div>
+          <div class="row">
+            <div class="t"><b>Email</b><span>Used for sign-in and account notices. Never shown publicly.</span></div>
+            <div class="ctl"><span class="ro">n•••••••@gmail.com</span><button class="btn ghost" id="chgEmail">Change</button></div>
+          </div>
+          <div class="row">
+            <div class="t"><b>Password</b><span>We’ll email you a secure reset link.</span></div>
+            <div class="ctl"><button class="btn ghost" id="resetPw">Send reset link</button></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="sec" id="privacy">
+        <header><h2>Privacy</h2><p>Control what other learners can see</p></header>
+        <div class="card">
+          <div class="row">
+            <div class="t"><b>Public profile</b><span>Anyone with your link can view your level, badges and milestones.</span></div>
+            <div class="ctl"><button class="sw" role="switch" data-kind="switch" data-key="publicProfile" aria-label="Public profile"></button></div>
+          </div>
+          <div class="row">
+            <div class="t"><b>Show on leaderboard</b><span>Your callsign and XP appear in the weekly rankings.</span></div>
+            <div class="ctl"><button class="sw" role="switch" data-kind="switch" data-key="showLeaderboard" aria-label="Show on leaderboard"></button></div>
+          </div>
+          <div class="row">
+            <div class="t"><b>Show activity heatmap</b><span>Display your daily activity on your public profile.</span></div>
+            <div class="ctl"><button class="sw" role="switch" data-kind="switch" data-key="showHeatmap" aria-label="Show activity heatmap"></button></div>
+          </div>
+          <div class="row">
+            <div class="t"><b>Profile link</b><span>Share your profile without signing in.</span></div>
+            <div class="ctl"><button class="btn ghost" id="copyLink">Copy profile link</button></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="sec" id="notifications">
+        <header><h2>Notifications</h2><p>Only what’s useful. Change any time.</p></header>
+        <div class="card">
+          <div class="row">
+            <div class="t"><b>Streak reminders <span class="pill" data-pill="nStreak"></span></b><span>A nudge when today’s learning isn’t done yet.</span></div>
+            <div class="ctl"><button class="sw" role="switch" data-kind="switch" data-key="nStreak" aria-label="Streak reminders"></button></div>
+          </div>
+          <div class="row">
+            <div class="t"><b>Reminder time</b><span>When streak reminders arrive, in your local time.</span></div>
+            <div class="ctl"><input type="time" data-key="remindAt" aria-label="Reminder time"></div>
+          </div>
+          <div class="row">
+            <div class="t"><b>Level-up alerts</b><span>A message when you reach a new level or title.</span></div>
+            <div class="ctl"><button class="sw" role="switch" data-kind="switch" data-key="nLevel" aria-label="Level-up alerts"></button></div>
+          </div>
+          <div class="row">
+            <div class="t"><b>Weekly digest</b><span>Your XP, lessons and streak every Monday.</span></div>
+            <div class="ctl"><button class="sw" role="switch" data-kind="switch" data-key="nDigest" aria-label="Weekly digest"></button></div>
+          </div>
+          <div class="row">
+            <div class="t"><b>Product updates</b><span>New lessons and features. Occasional, never spammy.</span></div>
+            <div class="ctl"><button class="sw" role="switch" data-kind="switch" data-key="nProduct" aria-label="Product updates"></button></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="sec" id="learning">
+        <header><h2>Learning</h2><p>Pace and goals</p></header>
+        <div class="card">
+          <div class="row">
+            <div class="t"><b>Daily goal</b><span>Minutes you aim for each day. Keeps your streak alive.</span></div>
+            <div class="ctl">
+              <div class="seg" role="radiogroup" aria-label="Daily goal">
+                <label><input type="radio" name="goal" value="10" data-key="dailyGoal"><span>10 min</span></label>
+                <label><input type="radio" name="goal" value="20" data-key="dailyGoal"><span>20 min</span></label>
+                <label><input type="radio" name="goal" value="30" data-key="dailyGoal"><span>30 min</span></label>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="t"><b>Pace</b><span>Self-paced lets you pick any lesson. Guided suggests the next one.</span></div>
+            <div class="ctl">
+              <select data-key="pace" aria-label="Pace">
+                <option value="self">Self-paced</option>
+                <option value="guided">Guided</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="t"><b>Continue to next lesson</b><span>Open the next lesson automatically after you finish one.</span></div>
+            <div class="ctl"><button class="sw" role="switch" data-kind="switch" data-key="autoNext" aria-label="Continue to next lesson"></button></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="sec" id="appearance">
+        <header><h2>Appearance</h2><p>Applied when you save</p></header>
+        <div class="card">
+          <div class="row">
+            <div class="t"><b>Theme</b><span>Match your device, or pick one.</span></div>
+            <div class="ctl">
+              <div class="seg" role="radiogroup" aria-label="Theme">
+                <label><input type="radio" name="theme" value="dark" data-key="theme"><span>Dark</span></label>
+                <label><input type="radio" name="theme" value="light" data-key="theme"><span>Light</span></label>
+                <label><input type="radio" name="theme" value="system" data-key="theme"><span>System</span></label>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="t"><b>Reduce motion</b><span>Turn off animations and the level-up burst.</span></div>
+            <div class="ctl"><button class="sw" role="switch" data-kind="switch" data-key="reduceMotion" aria-label="Reduce motion"></button></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="sec" id="data">
+        <header><h2>Data & security</h2><p>Your information, your control</p></header>
+        <div class="card">
+          <div class="row">
+            <div class="t"><b>Download your data</b><span>Profile, progress, XP history and badges as a single file.</span></div>
+            <div class="ctl"><button class="btn ghost" id="export">Request export</button></div>
+          </div>
+          <div class="row stack">
+            <div class="t"><b>Active sessions</b><span>Where you’re signed in right now.</span></div>
+            <div>
+              <div class="sess"><div>Chrome on Windows <span>· This device</span></div><span>Active now</span></div>
+              <div class="sess"><div>Nox app on iPhone <span>· Iligan</span></div><span>2 days ago</span></div>
+            </div>
+            <div class="ctl"><button class="btn ghost" id="signoutAll">Sign out other sessions</button></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="sec" id="danger">
+        <header><h2>Delete account</h2><p>This removes your progress, badges and callsign for good.</p></header>
+        <div class="card danger-card">
+          <div class="row">
+            <div class="t"><b>Delete my account</b><span>You can’t undo this. Export your data first if you want a copy.</span></div>
+            <div class="ctl"><button class="btn danger" id="delOpen">Delete account</button></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div class="savebar" id="savebar" role="region" aria-label="Unsaved changes">
+  <div class="in">
+    <div class="msg"><b>Unsaved changes</b></div>
+    <div class="acts">
+      <button class="btn ghost" id="discard">Discard</button>
+      <button class="btn" id="save">Save changes</button>
+    </div>
+  </div>
+</div>
+
+<dialog id="ddlg" aria-labelledby="ddh">
+  <form method="dialog" id="dform">
+    <h3 id="ddh">Delete account?</h3>
+    <p>All progress, badges and your callsign will be permanently removed. Type your callsign to confirm.</p>
+    <label>Callsign
+      <input type="text" id="dconf" autocomplete="off" aria-label="Type your callsign to confirm">
+    </label>
+    <div class="foot">
+      <button type="button" class="btn ghost" id="dcancel">Cancel</button>
+      <button type="button" class="btn danger" id="dgo" disabled>Delete forever</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const DEFAULTS={name:"nightowl",publicProfile:true,showLeaderboard:true,showHeatmap:false,nStreak:true,remindAt:"19:30",nLevel:true,nDigest:true,nProduct:false,dailyGoal:"20",pace:"self",autoNext:true,theme:"dark",reduceMotion:false};
+try{
+  const nv=JSON.parse(localStorage.getItem("nox-v2")||"null");
+  if(nv&&nv.name)DEFAULTS.name=nv.name;
+}catch(e){}
+let S=structuredClone(DEFAULTS), saved=structuredClone(DEFAULTS);
+const $=s=>document.querySelector(s);
+const NAME_RE=/^[A-Za-z0-9_-]{3,16}$/;
+
+function toast(m){const t=$("#toast");t.textContent=m;t.style.opacity=1;clearTimeout(toast.k);toast.k=setTimeout(()=>t.style.opacity=0,1900)}
+
+function nameError(){return NAME_RE.test(S.name)?"":"Use 3–16 letters, numbers, - or _ (no spaces)."}
+
+function bind(){
+  document.querySelectorAll("[data-key]").forEach(el=>{
+    const k=el.dataset.key, v=S[k];
+    if(el.dataset.kind==="switch"){el.setAttribute("aria-checked",String(!!v));return}
+    if(el.type==="radio"){el.checked=String(v)===el.value;return}
+    if(el.value!==String(v))el.value=v;
+  });
+  document.querySelectorAll("[data-pill]").forEach(p=>{const on=S[p.dataset.pill];p.textContent=on?"On":"Off";p.classList.toggle("off",!on)});
+  $("#previewName").textContent="Shown as “"+(S.name||"—")+"”";
+  const e=nameError(), ni=$("#name");
+  $("#nerr").textContent=e; ni.setAttribute("aria-invalid",String(!!e));
+  document.documentElement.dataset.theme=resolvedTheme();
+  document.body.classList.toggle("rm",!!S.reduceMotion);
+  const dirty=JSON.stringify(S)!==JSON.stringify(saved);
+  $("#savebar").classList.toggle("on",dirty);
+  $("#save").disabled=!!e;
+  $("#savebar .msg").innerHTML=e?`<b style="color:var(--err)">Fix the callsign to save</b>`:"<b>Unsaved changes</b>";
+}
+
+function resolvedTheme(){
+  const t=S.theme;
+  if(t!=="system")return t;
+  return matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";
+}
+
+function set(k,v){S[k]=v;bind()}
+
+document.addEventListener("click",e=>{
+  const sw=e.target.closest('button[data-kind="switch"]');
+  if(sw){set(sw.dataset.key,!S[sw.dataset.key])}
+});
+["input","change"].forEach(evt=>document.addEventListener(evt,e=>{
+  const el=e.target;
+  if(!el.dataset||!el.dataset.key||el.dataset.kind==="switch")return;
+  if(el.type==="radio"&&!el.checked)return;
+  set(el.dataset.key, el.dataset.key==="dailyGoal"?String(el.value):el.value);
+}));
+
+/* sidebar: highlight the section in view */
+const links=[...document.querySelectorAll("nav a")];
+const io=new IntersectionObserver(es=>{es.forEach(en=>{
+  if(en.isIntersecting){links.forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+en.target.id))}
+})},{rootMargin:"-30% 0px -60% 0px"});
+document.querySelectorAll(".sec").forEach(s=>io.observe(s));
+
+$("#save").addEventListener("click",()=>{
+  if(nameError())return;
+  saved=structuredClone(S);
+  try{
+    let nv=JSON.parse(localStorage.getItem("nox-v2")||"{}");
+    nv.name=S.name;
+    localStorage.setItem("nox-v2",JSON.stringify(nv));
+  }catch(e){}
+  bind();
+  toast("Settings saved");
+});
+$("#discard").addEventListener("click",()=>{S=structuredClone(saved);bind();toast("Changes discarded")});
+
+$("#copyLink").addEventListener("click",()=>toast(S.publicProfile?"Profile link copied":"Turn on Public profile to share your link"));
+$("#chgEmail").addEventListener("click",()=>toast("We’ll send a confirmation to your new address"));
+$("#resetPw").addEventListener("click",()=>toast("Reset link sent to your email"));
+$("#export").addEventListener("click",()=>toast("Export started. We’ll email you a link"));
+$("#signoutAll").addEventListener("click",()=>toast("Other sessions signed out"));
+$("#back").addEventListener("click",()=>location.href="Nox – Profile.html");
+
+/* delete account: type callsign to unlock */
+const ddlg=$("#ddlg"), dconf=$("#dconf"), dgo=$("#dgo");
+$("#delOpen").addEventListener("click",()=>{dconf.value="";dgo.disabled=true;ddlg.showModal();dconf.focus()});
+$("#dcancel").addEventListener("click",()=>ddlg.close());
+dconf.addEventListener("input",()=>{dgo.disabled=dconf.value!==saved.name});
+dgo.addEventListener("click",()=>{ddlg.close();toast("Account scheduled for deletion")});
+
+bind();
+</script>
+</body>
+</html>

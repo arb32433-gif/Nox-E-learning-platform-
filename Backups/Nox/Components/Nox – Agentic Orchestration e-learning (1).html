@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<title>Nox – Learn agentic orchestration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter+Tight:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0f14;--bg2:#111d27;--panel:#121a22;--line:#1f2b36;--ink:#dbe6dc;--mute:#8d9a94;--or:#ff5b35;--mint:#c6dac9;--dark:#0b0f14;color-scheme:dark;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.55 "Inter Tight",system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh;position:relative;overflow-x:hidden}
+#net{position:fixed;inset:0;width:100%;height:100%;z-index:0;opacity:.7;pointer-events:none}
+body::after{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at 75% 25%,rgba(17,29,39,.75) 0%,transparent 65%),radial-gradient(ellipse at 20% 75%,rgba(18,26,34,.6) 0%,transparent 55%)}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+.disp{font-family:"Barlow Condensed","Arial Narrow",sans-serif}
+.app{display:grid;grid-template-columns:260px 1fr;min-height:100vh;width:100%;position:relative;z-index:1}
+aside{border-right:1px solid var(--line);padding:28px 22px;display:flex;flex-direction:column;gap:26px;position:sticky;top:0;height:100vh;background:rgba(11,15,20,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.logo{display:flex;align-items:center;gap:12px;font-weight:800;font-size:28px;letter-spacing:-.04em}
+.logo img{width:32px;height:32px;object-fit:contain;flex:none;transition:transform .3s ease}
+.logo:hover img{transform:scale(1.08)}
+.logo small{display:block;font-size:12px;font-weight:400;color:var(--mute);letter-spacing:0;margin-top:-4px}
+.coll{border-block:1px solid var(--line);padding:16px 0;font-size:13px}
+.coll b{display:block;font-size:14px}.coll span{color:var(--mute)}
+nav{display:flex;flex-direction:column;gap:4px}
+nav p{margin:0 0 6px 10px;color:var(--mute);font-size:12px}
+nav button,nav a{display:flex;align-items:center;gap:12px;background:none;border:0;border-radius:6px;padding:11px 12px;cursor:pointer;text-align:left;color:var(--mute);text-decoration:none}
+nav button:hover,nav a:hover{color:var(--ink)}
+nav button[aria-current=page],nav a[aria-current=page]{background:var(--mint);color:var(--dark);font-weight:700}
+nav svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+nav em{margin-left:auto;font-style:normal;font-size:12px}
+.note{margin-top:auto;font-size:12.5px;color:var(--mute);border-top:1px solid var(--line);padding-top:16px}
+.note b{color:var(--ink);display:block;margin-bottom:4px}
+.main{min-width:0;width:100%}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding:18px 44px;font-size:13px;color:var(--mute);flex-wrap:wrap;background:rgba(11,15,20,.72);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);position:sticky;top:0;z-index:4;width:100%}
+header .who{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.av{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--panel);display:grid;place-items:center;color:var(--mint);font-weight:700;font-size:14px}
+.menu{display:none;background:none;border:1px solid var(--line);border-radius:6px;padding:6px 10px;cursor:pointer}
+.link{background:none;border:0;color:var(--or);cursor:pointer;padding:0;font-weight:500}
+.linkish{background:none;border:0;color:var(--mute);cursor:pointer;padding:6px 0}
+.linkish:hover{color:var(--ink)}
+.linkish:disabled{opacity:.35;cursor:default}
+main{padding:44px;width:100%;max-width:100%}
+h1{font-size:clamp(40px,6vw,76px);line-height:.95;letter-spacing:-.045em;font-weight:800;margin:0 0 14px;color:var(--mint)}
+h2{font-size:22px;letter-spacing:-.02em;margin:0 0 6px}
+.lead{color:var(--mute);max-width:56ch;margin:0 0 34px;font-size:16px}
+.mblock{margin-bottom:40px}
+.mdesc{color:var(--mute);margin:0 0 16px;font-size:14px}
+.mprog{color:var(--or);font-weight:700;font-size:13px}
+.route{border-block:1px solid var(--line);padding:24px 0;margin-bottom:38px}
+.route .mname{display:flex;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.route .mname b{font-size:15px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-bottom:22px}
+.tile{border:0;border-radius:4px;padding:12px;min-height:118px;text-align:left;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;background:var(--or);color:var(--dark)}
+.tile.p2{background:var(--mint)}
+.tile b{font-size:15px;line-height:1.15;letter-spacing:-.01em}
+.tile span{font-size:12px;opacity:.8}
+.tile.done{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px var(--mute)}
+.tile.next{background-image:repeating-linear-gradient(135deg,rgba(0,0,0,.28) 0 2px,transparent 2px 7px);box-shadow:inset 0 0 0 2px var(--dark),0 0 0 2px var(--or)}
+.tile.p2.next{box-shadow:inset 0 0 0 2px var(--dark),0 0 0 2px var(--mint)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:38px}
+.card{background:rgba(18,26,34,.74);border:1px solid var(--line);border-radius:10px;padding:24px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.stat b{display:block;font-size:44px;line-height:1;letter-spacing:-.04em;color:var(--mint)}
+.stat span{color:var(--mute);font-size:14px}
+.bar{height:6px;background:var(--line);border-radius:3px;margin-top:14px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--or)}
+.btn{background:var(--or);color:var(--dark);border:0;border-radius:6px;padding:12px 20px;font-weight:700;cursor:pointer}
+.btn.alt{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+.two{display:grid;grid-template-columns:1fr 1.15fr;gap:20px;align-items:start}
+.avbig{width:64px;height:64px;border-radius:50%;background:var(--panel);border:1px solid var(--line);display:grid;place-items:center;font-size:24px;font-weight:800;color:var(--mint);margin-bottom:16px}
+input[type=text],input[type=email]{width:100%;background:#18232d;border:1px solid var(--line);border-radius:6px;padding:12px 14px;margin:12px 0;color:var(--ink);transition:border-color .25s,box-shadow .25s}
+input[type=text]:focus,input[type=email]:focus{outline:none;border-color:var(--mint);box-shadow:0 0 0 3px rgba(198,218,201,.14)}
+.hint{color:var(--mute);font-size:13px;margin:0}
+.err{color:var(--or);font-size:13px;min-height:20px;margin:0 0 10px}
+.rec{list-style:none;margin:0;padding:0}
+.rec li{display:flex;align-items:center;gap:16px;padding:16px 0;border-top:1px solid var(--line)}
+.rec li:first-child{border-top:0}
+.num{font-style:italic;color:var(--mute);width:34px;flex:none}
+.rec .t{flex:1;min-width:0;background:none;border:0;padding:0;text-align:left;cursor:pointer}
+.rec .t b{display:block;font-weight:500;font-size:16px}
+.rec .t b:hover{color:var(--or)}
+.rec .t span{color:var(--mute);font-size:13px}
+.tag{font-size:12px;border:1px solid var(--line);border-radius:20px;padding:2px 10px;color:var(--mute);white-space:nowrap}
+.chk{width:30px;height:30px;border-radius:50%;border:1px solid var(--mute);background:none;cursor:pointer;display:grid;place-items:center;flex:none;color:var(--dark)}
+.chk[aria-pressed=true]{background:var(--or);border-color:var(--or)}
+.chk svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
+.mission h3{margin:10px 0 6px;font-size:18px;letter-spacing:-.01em}
+.mission p{color:var(--mute);margin:0 0 18px;font-size:14px}
+.pts{color:var(--or);font-weight:700}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:14px 12px;border-top:1px solid var(--line)}
+th{color:var(--mute);font-weight:400;font-size:13px;border-top:0}
+tr.me td{color:var(--or);font-weight:700}
+.tw{overflow-x:auto}
+.lbody{max-width:68ch}
+.lbody p{font-size:16px;line-height:1.7;margin:0 0 16px}
+.lbody ul{padding-left:20px;margin:0 0 20px}
+.lbody li{margin-bottom:6px}
+.try{border:1px solid var(--or);border-radius:10px;padding:20px 22px;margin:28px 0}
+.try b{color:var(--or)}
+.try p{margin:8px 0 0}
+.bottom{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:20px;margin-top:30px}
+.navpair{display:flex;gap:22px}
+
+/* ---- module selection: archive stage with 3D book ---- */
+.stage{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:24px;width:100%;text-align:left;cursor:pointer;color:var(--ink);
+background-color:rgba(18,26,34,.76);background-image:linear-gradient(rgba(198,218,201,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(198,218,201,.06) 1px,transparent 1px);background-size:36px 36px;
+border:1px solid var(--line);border-radius:10px;padding:40px;min-height:320px;margin-bottom:18px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:border-color .2s}
+.stage:hover,.stage:focus-visible{border-color:var(--or)}
+.mno{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:clamp(64px,10vw,130px);line-height:.85;color:var(--mint);letter-spacing:-.005em}
+.arch{font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:clamp(22px,3vw,34px);color:var(--or);text-transform:uppercase;margin-top:18px;letter-spacing:.01em;line-height:1.05}
+.smeta{color:var(--mute);font-size:13px;margin-top:14px}
+.open{display:inline-block;margin-top:22px;font-weight:700;font-size:14px;border-bottom:1px solid var(--or);padding-bottom:3px}
+.scene{perspective:1000px;display:flex;justify-content:center;align-items:center;min-height:280px}
+.book{position:relative;width:200px;height:270px;transform-style:preserve-3d;transform:rotateX(10deg) rotateY(-28deg) rotateZ(-3deg);transition:transform .45s}
+.stage:hover .book,.stage:focus-visible .book{transform:rotateX(6deg) rotateY(-16deg) rotateZ(-2deg) translateY(-8px)}
+.cover{position:absolute;inset:0;border-radius:4px 10px 10px 4px;background:linear-gradient(160deg,#2b2e2c,#151716 70%);box-shadow:inset 0 0 0 1px #3a3f3c,0 28px 40px -10px rgba(0,0,0,.8);padding:20px 18px;display:flex;flex-direction:column;gap:12px;transform:translateZ(14px)}
+.cover::before{content:"";position:absolute;top:0;right:0;width:16px;height:16px;background:var(--or)}
+.ctag{font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:24px;line-height:1;color:var(--mint);letter-spacing:.01em}
+.ctag i{font-style:normal;color:var(--or);margin:0 3px}
+.cbody{margin:0;font-size:12px;line-height:1.5;color:var(--mint);opacity:.85}
+.code{height:50px;background:repeating-linear-gradient(transparent 0 8px,rgba(198,218,201,.2) 8px 9px);opacity:.6}
+.cfoot{margin-top:auto;font-family:"Barlow Condensed",sans-serif;color:var(--mute);font-size:14px;letter-spacing:.04em}
+.spine{position:absolute;left:0;top:0;bottom:0;width:14px;background:#0c0d0c;transform:rotateY(-90deg);transform-origin:left center}
+.pages{position:absolute;right:0;top:4px;bottom:4px;width:14px;background:repeating-linear-gradient(90deg,#4a4a48 0 1px,#1d1e1d 1px 3px);transform:rotateY(90deg);transform-origin:left center}
+.mhero{display:flex;align-items:center;gap:24px;flex-wrap:wrap;margin-bottom:30px}
+.mhero .mno{font-size:clamp(56px,8vw,96px)}
+.mhero .arch{margin-top:0}
+.back{margin-bottom:18px;display:inline-block}
+
+@media(max-width:900px){
+.app{grid-template-columns:1fr}
+aside{position:fixed;inset:0 auto 0 0;width:270px;z-index:10;background:rgba(11,15,20,.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);transform:translateX(-100%);transition:transform .25s}
+aside.open{transform:none}
+.menu{display:block}
+header,main{padding-inline:20px}
+.two{grid-template-columns:1fr}
+.stage{grid-template-columns:1fr;padding:28px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}#net{display:none}}
+</style>
+</head>
+<body>
+<canvas id="net" aria-hidden="true"></canvas>
+<div class="app">
+<aside id="side">
+  <a href="Nox – Learn to run AI agents.html" class="logo" style="text-decoration:none;color:inherit;" title="Return to Nox home"><img src="assets/nox-logo.png" alt="Nox Logo" width="32" height="32"><div>Nox<small>Learn to run AI agents</small></div></a>
+  <div class="coll"><b>Agentic Orchestration</b><span>Self-paced · 3 modules · 9 lessons</span></div>
+  <nav aria-label="Workspace">
+    <p>Your workspace</p>
+    <button data-v="overview"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Overview</button>
+    <button data-v="modules"><svg viewBox="0 0 24 24"><path d="M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2zM22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"/></svg>Modules</button>
+    <button data-v="practice"><svg viewBox="0 0 24 24"><path d="M5 21V4m0 0h12l-2 4 2 4H5"/></svg>Practice<em>6</em></button>
+    <button data-v="board"><svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3"/></svg>Leaderboard</button>
+    <button data-v="profile"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Study record</button>
+    <p style="margin-top:10px;">Platform tools</p>
+    <a href="Nox – Your progress.html" title="Progress &amp; Analytics"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Progress</a>
+    <a href="Nox – Notes.html" title="Study Notes &amp; Vault"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Notes</a>
+    <a href="Nox – Profile.html" title="Learner Profile &amp; Journey"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>My profile</a>
+  </nav>
+  <div class="note"><b>A note on practice</b>Try workflows on sample data first. Only connect real accounts when you’re ready.</div>
+</aside>
+<div class="main">
+  <header>
+    <div class="who"><button class="menu" id="menu" aria-label="Open menu">Menu</button><span id="crumb">Agentic Orchestration › Overview</span></div>
+    <div class="who"><a href="Nox – Your progress.html" class="linkish" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Progress</a><a href="Nox – Notes.html" class="linkish" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Notes</a><span>Your personal study space</span><button class="link" id="signin">Sign in</button><a href="Nox – Profile.html" class="av" id="hav" style="text-decoration:none;" title="View Profile">?</a></div>
+  </header>
+  <main id="view"></main>
+</div>
+</div>
+<div class="toast" id="toast" role="status" style="position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,0);background:var(--mint);color:var(--dark);padding:12px 18px;border-radius:8px;font-weight:700;opacity:0;pointer-events:none;transition:.25s"></div>
+<script>
+const MODS=[
+ {t:"Foundations & handoffs",s:"How agents think, use tools and pass work along.",lessons:[
+  {t:"Agentic foundations & tool use",s:"What an AI agent is, and how it uses apps for you.",m:20,tag:"Everyone",
+   body:"An AI agent is a model that works toward a goal in steps. It reads a request, decides what to do next, uses a tool such as a calendar, a spreadsheet or a search, then checks the result before it continues. The difference from a plain chatbot is that loop: plan, act, check, repeat.",
+   ideas:["A tool is any action an agent can take on your behalf.","Work happens in steps, so you can check each one.","Clear goals and limits produce better results than vague ones."],
+   try:"Pick a task you repeat each week. Write down the steps you take and the apps you use. Those apps are your agent’s first tools."},
+  {t:"Multi-agent handoffs",s:"Passing work between agents without losing context.",m:25,tag:"Everyone",
+   body:"Some jobs are too big for one agent. A handoff passes work from one agent to another along with the context it needs. A good handoff carries the goal, what is already finished, and what is still open.",
+   ideas:["Each agent should have one clear role.","Context gets lost at handoffs, so write it down.","A router decides which agent receives each request."],
+   try:"Write a short brief that a colleague could follow: the goal, what is finished, and what comes next."},
+  {t:"Model Context Protocol (MCP)",s:"One standard way to plug your tools into any agent.",m:30,tag:"Builders",
+   body:"MCP is an open standard that lets agents connect to tools and data in one consistent way. Instead of custom wiring for every app, a tool describes what it can do once, and any MCP-aware agent can use it.",
+   ideas:["A server exposes tools; the agent using them is the client.","Permissions decide what an agent can read or change.","Start with read-only access and widen it later."],
+   try:"List three tools you use every day. For each, note what an agent should be allowed to read, and what it should never change."},
+  {t:"Supervisor & worker patterns",s:"One agent plans, others do the tasks.",m:25,tag:"Everyone",
+   body:"A supervisor agent plans the work and splits it into subtasks. Worker agents each take one piece and report back. The supervisor checks the results and decides what happens next.",
+   ideas:["Subtasks should be small enough to check.","The supervisor owns the final answer.","Workers carry out tasks; they don’t set the overall plan."],
+   try:"Break a project you have into five subtasks. Which one would you hand to a worker agent first?"}]},
+ {t:"Advanced deployment",s:"Keeping agents safe and under your control.",lessons:[
+  {t:"Guardrails & AI safety",s:"Keeping agents inside the lines you set.",m:25,tag:"Everyone",p:2,
+   body:"Guardrails are rules that keep an agent inside boundaries you set: what it may touch, what it may say, and when it must stop. Good guardrails work before, during and after each step.",
+   ideas:["Limit tools to what the task actually needs.","Check outputs before they reach a customer.","Keep a log of actions so mistakes can be traced."],
+   try:"Write down three things your agent must never do without asking you first."},
+  {t:"Human-in-the-loop",s:"Where you approve, edit or stop an agent.",m:20,tag:"Everyone",p:2,
+   body:"Some steps should always wait for a person, such as sending money, publishing a post or messaging a client. A confirmation loop shows you the proposed action so you can approve it, edit it or stop it.",
+   ideas:["Approve high-impact actions; automate low-risk ones.","Make each proposal readable in a few seconds.","Track how often you edit proposals to tune the agent."],
+   try:"Choose one action in your work that needs approval every time, and one that can run without you."}]},
+ {t:"Going further",s:"Memory, testing, and shipping your first workflow.",lessons:[
+  {t:"Memory & context",s:"What agents remember, and what they should forget.",m:25,tag:"Builders",p:2,
+   body:"Agents can keep notes between sessions, but memory needs managing. Store what helps the next task, and forget what is stale, private or wrong.",
+   ideas:["Short-term memory lives inside one conversation.","Long-term memory should be reviewed regularly.","Relevant context usually beats more context."],
+   try:"List three facts an agent should remember about your business or studies, and one thing it should forget."},
+  {t:"Testing & monitoring",s:"Check results, catch mistakes, track cost.",m:30,tag:"Builders",p:2,
+   body:"Before you trust an agent, test it on examples where you already know the right answer. After launch, keep watching results, errors and cost over time.",
+   ideas:["Build a small set of realistic test cases.","Watch for silent failures that look like success.","Track cost per task, not just the monthly bill."],
+   try:"Write five inputs your agent should handle, and the output you expect for each one."},
+  {t:"Ship your first workflow",s:"Build a small agent team for your own work.",m:45,tag:"Everyone",p:2,
+   body:"Put it all together: a small agent team that completes one real job from start to finish, with a person approving the key steps. Start with a task you already do by hand.",
+   ideas:["Pick one task you repeat.","Run it on sample data before real data.","Review after a week and adjust."],
+   try:"Write the workflow in five steps, and mark the step where you want to approve before anything happens."}]}
+];
+const MISSIONS=[
+ {t:"Inbox triage crew",d:"Set up two agents: one sorts email, one drafts replies for you to approve.",pts:120,tag:"Business owners"},
+ {t:"Content handoff",d:"Pass a rough brief from a research agent to a writing agent.",pts:100,tag:"Designers"},
+ {t:"Booking assistant",d:"Build a supervisor that books, confirms and reminds clients.",pts:150,tag:"VAs"},
+ {t:"Study buddy team",d:"Make agents that summarize notes, quiz you and track weak spots.",pts:110,tag:"Students"},
+ {t:"Connect a tool with MCP",d:"Link a calendar or spreadsheet so an agent can read it.",pts:160,tag:"Builders"},
+ {t:"Add an approval step",d:"Make an agent ask before it sends or spends anything.",pts:90,tag:"Everyone"}];
+const BOARD=[["nightowl",1240],["quietfox",1105],["lantern",980],["vela",910],["moth",820],["orbit",760]];
+
+const ALL=[];
+MODS.forEach((m,mi)=>m.lessons.forEach((l,li)=>{l.id=(mi+1)+"."+(li+1);l.mi=mi;ALL.push(l)}));
+
+let S={name:"",user:"",pending:"",done:[],v:"overview",k:"",m:0};
+try{
+  const x=JSON.parse(localStorage.getItem("nox-v2")||"null");
+  if(x)S=Object.assign(S,x);
+  if(!S.user){
+    const portalAuth=JSON.parse(localStorage.getItem("nox-portal")||"null");
+    if(portalAuth&&portalAuth.session&&portalAuth.session>Date.now()&&portalAuth.user){
+      S.user=portalAuth.user;
+      if(!S.name)S.name=portalAuth.user.split("@")[0];
+    }
+  }
+}catch(e){}
+const save=()=>{try{localStorage.setItem("nox-v2",JSON.stringify(S))}catch(e){}};
+const $=s=>document.querySelector(s),V=$("#view");
+const isDone=id=>S.done.includes(id);
+const pct=()=>Math.round(S.done.length/ALL.length*100);
+const modDone=mi=>MODS[mi].lessons.filter(l=>isDone(l.id)).length;
+const modMin=mi=>MODS[mi].lessons.reduce((a,l)=>a+l.m,0);
+const nextL=()=>ALL.find(l=>!isDone(l.id));
+const initial=()=>((S.name||S.user||"?")[0]||"?").toUpperCase();
+const pad=n=>String(n).padStart(2,"0");
+const CHECK='<svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg>';
+
+function toast(m){const t=$("#toast");t.textContent=m;t.style.opacity=1;clearTimeout(toast.k);toast.k=setTimeout(()=>t.style.opacity=0,1800)}
+
+function tile(l){const n=nextL();return `<button class="tile ${l.p==2?"p2":""} ${isDone(l.id)?"done":""} ${n&&n.id==l.id?"next":""}" data-open="${l.id}"><span>${l.id}</span><b>${l.t}</b><span>${isDone(l.id)?"Done":l.m+" min"}</span></button>`}
+
+function lessonList(mi){return `<ul class="rec">${MODS[mi].lessons.map(l=>`<li><span class="num">${l.id}</span><button class="t" data-open="${l.id}"><b>${l.t}</b><span>${l.s}</span></button><span class="tag">${l.tag}</span><button class="chk" aria-pressed="${isDone(l.id)}" aria-label="Mark ${l.t} as done" data-toggle="${l.id}">${isDone(l.id)?CHECK:""}</button></li>`).join("")}</ul>`}
+
+function book(mi){return `<div class="scene" aria-hidden="true"><div class="book"><div class="cover"><div class="ctag">NOTEBOOK<i>//</i>${pad(mi+1)}-${MODS[mi].lessons.length}L</div><p class="cbody">${MODS[mi].s}</p><div class="code"></div><div class="cfoot">FS-0${mi+1} // ARCHIVE</div></div><div class="spine"></div><div class="pages"></div></div></div>`}
+
+const views={
+overview(){const n=nextL();return `
+<h1>Put AI agents<br>to work for you.</h1>
+<p class="lead">Nox teaches you how teams of AI agents get real work done. Plain language, short lessons, and practice that fits your job.</p>
+<div class="route">${MODS.map((m,mi)=>`<div class="mblock" style="margin:0 0 22px"><div class="mname"><b>Module ${mi+1} · ${m.t}</b><span class="mprog">${modDone(mi)}/${m.lessons.length} lessons</span></div><div class="tiles">${m.lessons.map(tile).join("")}</div></div>`).join("")}</div>
+<div class="stats">
+<div class="card stat"><b>${S.done.length}/${ALL.length}</b><span>lessons finished</span><div class="bar"><i style="width:${pct()}%"></i></div></div>
+<div class="card stat"><b>${ALL.reduce((a,l)=>a+(isDone(l.id)?0:l.m),0)}</b><span>minutes of lessons left</span></div>
+<div class="card"><b style="font-size:18px">${n?"Up next: "+n.t:"All lessons done"}</b><p class="hint" style="margin:6px 0 16px">${n?n.s:"Pick a practice mission to keep going."}</p>${n?`<button class="btn" data-open="${n.id}">Continue learning</button>`:`<button class="btn" data-v="practice">Open practice</button>`}</div></div>`},
+
+modules(){return `<h1>Choose a module.</h1><p class="lead">Each module is a shelf of lessons. Pick one to open it.</p>
+${MODS.map((m,mi)=>`<button class="stage" data-mod="${mi}" aria-label="Open Module ${mi+1}, ${m.t}">
+<div><div class="mno">MOD_${pad(mi+1)}</div><div class="arch">Archive // ${m.t}</div><div class="smeta">${m.lessons.length} lessons · ${modMin(mi)} min · ${modDone(mi)}/${m.lessons.length} done</div><span class="open">Open module →</span></div>
+${book(mi)}</button>`).join("")}`},
+
+module(){const mi=S.m in MODS?S.m:0,m=MODS[mi];return `
+<button class="linkish back" data-v="modules">← All modules</button>
+<div class="mhero"><div class="mno">MOD_${pad(mi+1)}</div><div><div class="arch">Archive // ${m.t}</div><p class="lead" style="margin:10px 0 0">${m.s}</p></div></div>
+<section class="mblock"><p class="mprog" style="margin:0 0 12px">${modDone(mi)}/${m.lessons.length} lessons done · ${modMin(mi)} min total</p><div class="card">${lessonList(mi)}</div></section>`},
+
+lesson(){const l=ALL.find(x=>x.id==S.k)||ALL[0],i=ALL.indexOf(l),m=MODS[l.mi];
+return `<button class="linkish back" data-v="module">← Back to ${m.t}</button>
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"><p class="hint" style="margin:0">Module ${l.mi+1} · Lesson ${l.id} · ${l.m} min</p><a href="Nox – Notes.html" class="linkish" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--mint)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Study Notes ↗</a></div>
+<h1 style="font-size:clamp(36px,5vw,60px);margin-top:10px">${l.t}</h1>
+<p class="lead">${l.s}</p>
+<div class="lbody"><p>${l.body}</p><p><b>Key ideas</b></p><ul>${l.ideas.map(x=>`<li>${x}</li>`).join("")}</ul>
+<div class="try"><b>Try it</b><p>${l.try}</p></div></div>
+<div class="bottom"><div class="navpair"><button class="linkish" data-step="-1" ${i==0?"disabled":""}>← Previous</button><button class="linkish" data-step="1" ${i==ALL.length-1?"disabled":""}>Next lesson →</button></div>
+<button class="btn ${isDone(l.id)?"alt":""}" data-complete="${l.id}">${isDone(l.id)?"Completed · undo":"Mark as complete"}</button></div>`},
+
+practice(){return `<h1>Practice.</h1><p class="lead">Pick a mission that looks like your own work. Each one uses sample data, so nothing real is touched.</p><div class="grid">${MISSIONS.map((x,i)=>`<div class="card mission"><span class="tag">${x.tag}</span><h3>${x.t}</h3><p>${x.d}</p><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span class="pts">${x.pts} pts</span><button class="btn alt" data-start="${i}">Start mission</button></div></div>`).join("")}</div>`},
+
+board(){const rows=[...BOARD.map(r=>({n:r[0],p:r[1]})),...(S.name?[{n:S.name,p:S.done.length*100,me:1}]:[])].sort((a,b)=>b.p-a.p);
+return `<h1>Leaderboard.</h1><p class="lead">Only callsigns show here. Your email never does.</p><div class="card tw"><table><thead><tr><th>Rank</th><th>Callsign</th><th>Points</th></tr></thead><tbody>${rows.map((r,i)=>`<tr class="${r.me?"me":""}"><td>${i+1}</td><td>${r.n}${r.me?" (you)":""}</td><td>${r.p}</td></tr>`).join("")}</tbody></table>${S.name?"":'<p class="hint" style="padding-top:14px">Choose a callsign on your profile to join the board.</p>'}</div>`},
+
+profile(){return `<h1>Your profile.</h1><p class="lead">Your callsign and progress in one place.</p>
+<div class="two"><div class="card"><div class="avbig">${initial()}</div><h2>${S.name?"Hi, "+S.name+".":"Choose your callsign."}</h2><p class="hint">Use a name you’re happy to show on the leaderboard.</p>
+<input type="text" id="cs" maxlength="16" placeholder="e.g. nightowl" value="${S.name}" aria-label="Callsign"><p class="err" id="err"></p><button class="btn" id="savecs">Save callsign</button>
+<div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap"><a href="Nox – Profile.html" class="btn alt" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;">Open Full Profile &amp; Badges →</a><a href="Nox – Your progress.html" class="btn alt" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;">Detailed Analytics</a><a href="Nox – Settings.html" class="linkish" style="text-decoration:none;">Settings</a></div>
+<p class="hint" style="margin-top:22px">${S.user?"Signed in as "+S.user+".":'<button class="linkish" data-v="signin">Sign in to save progress across devices</button> · <a href="Nox Portal – Sign in.html" class="linkish" style="text-decoration:none;color:var(--or)">Sign in via Portal</a>'}</p></div>
+<div class="card"><h2>Your study record</h2><p class="hint">${pct()}% complete</p><div class="bar" style="margin:12px 0 18px"><i style="width:${pct()}%"></i></div>${MODS.map((m,mi)=>`<p class="mprog" style="margin:18px 0 0">Module ${mi+1} · ${m.t}</p>${lessonList(mi)}`).join("")}</div></div>`},
+
+signin(){if(S.user)return `<h1>You’re signed in.</h1><p class="lead">Signed in as ${S.user}. Your email is never shown on the leaderboard.</p><div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><button class="btn alt" id="signout">Sign out</button><a href="Nox Portal – Sign in.html" class="linkish" style="text-decoration:none">Switch account via Portal →</a></div>`;
+ if(S.pending)return `<h1>Check your inbox.</h1><p class="lead">We sent a sign-in link to ${S.pending}. For this demo, open the link below to continue.</p><div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap"><button class="btn" id="demolink">Open sign-in link</button><button class="linkish" id="changeemail">Use a different email</button></div>`;
+ return `<h1>Sign in.</h1><p class="lead">Save your progress across devices. We only use your email to send a sign-in link.</p><div class="card" style="max-width:460px"><label class="hint" for="em">Email</label><input type="email" id="em" placeholder="you@example.com"><p class="err" id="err"></p><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button class="btn" id="sendlink">Send sign-in link</button><a href="Nox Portal – Sign in.html" class="btn alt" style="text-decoration:none;display:inline-flex;align-items:center">Portal Sign in →</a></div></div>`}
+};
+
+function go(v,k,keep){if(!views[v])v="overview";const y=window.scrollY;S.v=v;if(k)S.k=k;save();
+ V.innerHTML=views[v]();
+ const names={overview:"Overview",modules:"Modules",practice:"Practice",board:"Leaderboard",profile:"My profile",signin:"Sign in"};
+ let crumb="Agentic Orchestration › "+(names[v]||"");
+ if(v=="module")crumb="Modules › Module "+((S.m in MODS?S.m:0)+1);
+ if(v=="lesson"){const l=ALL.find(x=>x.id==S.k)||ALL[0];crumb="Modules › Module "+(l.mi+1)+" › "+l.t}
+ $("#crumb").textContent=crumb;
+ const navKey=(v=="module"||v=="lesson")?"modules":v;
+ document.querySelectorAll("nav button[data-v]").forEach(b=>b.dataset.v==navKey?b.setAttribute("aria-current","page"):b.removeAttribute("aria-current"));
+ $("#hav").textContent=initial();$("#signin").textContent=S.user?"Signed in":"Sign in";
+ $("#side").classList.remove("open");
+ keep?window.scrollTo(0,y):window.scrollTo(0,0)}
+
+document.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+ if(b.dataset.mod!==undefined){S.m=+b.dataset.mod;return go("module")}
+ if(b.dataset.v)return go(b.dataset.v);
+ if(b.dataset.open){const l=ALL.find(x=>x.id==b.dataset.open);if(l)S.m=l.mi;return go("lesson",b.dataset.open)}
+ if(b.dataset.toggle){const id=b.dataset.toggle,k=S.done.indexOf(id);k<0?(S.done.push(id),toast("Lesson done")):S.done.splice(k,1);save();return go(S.v,S.k,true)}
+ if(b.dataset.complete){const id=b.dataset.complete,k=S.done.indexOf(id);k<0?(S.done.push(id),toast("Lesson complete")):S.done.splice(k,1);save();return go("lesson",id,true)}
+ if(b.dataset.step){const i=ALL.findIndex(x=>x.id==S.k),n=ALL[i+ +b.dataset.step];if(n){S.m=n.mi;go("lesson",n.id)}return}
+ if(b.dataset.start!==undefined)return toast("“"+MISSIONS[b.dataset.start].t+"” opens in the full version");
+ if(b.id=="savecs"){const v=$("#cs").value.trim();if(!/^[A-Za-z0-9_-]{3,16}$/.test(v)){$("#err").textContent="Use 3–16 letters, numbers, - or _ (no spaces).";return}
+  S.name=v;save();go("profile");toast("Callsign saved");return}
+ if(b.id=="signin")return S.user ? go("profile") : (location.href = "Nox Portal – Sign in.html");
+ if(b.id=="menu")return $("#side").classList.toggle("open");
+ if(b.id=="sendlink"){const v=$("#em").value.trim();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){$("#err").textContent="Enter a valid email address.";return}
+  S.pending=v;save();go("signin");return}
+ if(b.id=="changeemail"){S.pending="";save();go("signin");return}
+ if(b.id=="demolink"){S.user=S.pending;S.pending="";save();go("profile");toast("Signed in");return}
+ if(b.id=="signout"){S.user="";save();try{localStorage.removeItem("nox-portal")}catch(e){}go("overview");toast("Signed out");return}
+});
+go(S.v&&views[S.v]?S.v:"overview",S.k,false);
+
+// network canvas: drifting nodes with links (matching landing page aesthetic)
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const cv=$("#net"),cx=cv?cv.getContext("2d"):null;let W,H,nodes=[];
+function sizeNet(){if(!cv)return;const r=cv.getBoundingClientRect(),d=Math.min(devicePixelRatio,2);W=r.width;H=r.height;cv.width=W*d;cv.height=H*d;cx.setTransform(d,0,0,d,0,0);
+ const n=Math.round(Math.min(75,W*H/16000));nodes=Array.from({length:n},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.32,vy:(Math.random()-.5)*.32,o:Math.random()<.12}))}
+function frameNet(){if(!cx)return;cx.clearRect(0,0,W,H);
+ for(const n of nodes){n.x+=n.vx;n.y+=n.vy;if(n.x<0||n.x>W)n.vx*=-1;if(n.y<0||n.y>H)n.vy*=-1}
+ for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){const a=nodes[i],b=nodes[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy);
+  if(d<145){cx.strokeStyle=`rgba(198,218,201,${(1-d/145)*.18})`;cx.lineWidth=1;cx.beginPath();cx.moveTo(a.x,a.y);cx.lineTo(b.x,b.y);cx.stroke()}}
+ for(const n of nodes){cx.fillStyle=n.o?"#ff5b35":"#c6dac9";cx.beginPath();cx.arc(n.x,n.y,n.o?2.4:1.5,0,Math.PI*2);cx.fill()}
+ if(!reduce)requestAnimationFrame(frameNet)}
+if(cv){sizeNet();frameNet();addEventListener("resize",()=>{sizeNet();if(reduce)frameNet()});}
+</script>
+</body>
+</html>

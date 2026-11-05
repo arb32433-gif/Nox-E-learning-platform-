@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nox – Notes</title>
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter+Tight:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0f14;--bg2:#0f161d;--panel:#121a22;--panel2:#161f28;--line:#1f2b36;--ink:#dbe6dc;--mute:#8d9a94;--or:#ff5b35;--mint:#c6dac9;--good:#5fd4a6;--sb:248px;--rp:248px;color-scheme:dark;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 14.5px/1.6 "Inter Tight",system-ui,-apple-system,"Segoe UI",sans-serif;overflow:hidden}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+kbd{font:500 11px "JetBrains Mono",monospace;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 6px;color:var(--mute)}
+
+/* top bar */
+.top{height:52px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 14px;border-bottom:1px solid var(--line);background:var(--bg)}
+.top .l,.top .r{display:flex;align-items:center;gap:10px;min-width:0}
+.brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:18px;letter-spacing:-.03em;text-decoration:none;color:var(--ink)}
+.brand img{width:24px;height:24px;object-fit:contain;transition:transform .3s ease}
+.brand:hover img{transform:scale(1.08)}
+.crumbs{color:var(--mute);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:38vw}
+.crumbs b{color:var(--ink);font-weight:600}
+.ib{background:none;border:1px solid var(--line);border-radius:7px;padding:6px 10px;color:var(--mute);cursor:pointer;font-size:13px;transition:color .2s,border-color .2s}
+.ib:hover{color:var(--ink);border-color:#2a3a47}
+.ib[aria-pressed=true]{color:var(--mint);border-color:var(--mint)}
+.btn{background:var(--or);color:var(--bg);border:0;border-radius:7px;padding:7px 14px;font-weight:700;font-size:13px;cursor:pointer;transition:transform .2s,box-shadow .3s;white-space:nowrap}
+.btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px -8px rgba(255,91,53,.6)}
+.btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line);font-weight:500}
+.btn.ghost:hover{box-shadow:inset 0 0 0 1px var(--mint)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.pill{font-size:12px;color:var(--mute);border:1px solid var(--line);border-radius:20px;padding:3px 10px;white-space:nowrap}
+.pill.ok{color:var(--good);border-color:rgba(95,212,166,.35)}
+.pill.warn{color:var(--or);border-color:rgba(255,91,53,.4)}
+
+/* workspace grid */
+.ws{display:grid;grid-template-columns:var(--sb) minmax(0,1fr) var(--rp);height:calc(100vh - 52px - env(safe-area-inset-bottom,0px))}
+.ws.no-l{--sb:0px}.ws.no-l .side{display:none}
+.ws.no-r{--rp:0px}.ws.no-r .rp{display:none}
+.side{border-right:1px solid var(--line);background:var(--bg2);display:flex;flex-direction:column;min-height:0}
+.rp{border-left:1px solid var(--line);background:var(--bg2);overflow:auto;padding:4px 0 24px}
+.sh{display:flex;justify-content:space-between;align-items:center;padding:14px 14px 8px;font-size:12px;color:var(--mute);letter-spacing:.02em}
+.sh b{font-family:"Barlow Condensed",sans-serif;font-size:18px;color:var(--mint);font-weight:600;letter-spacing:.01em}
+.search{margin:4px 12px 10px;background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:8px 10px;width:calc(100% - 24px);font-size:13px;transition:border-color .2s,box-shadow .2s}
+.search:focus{outline:none;border-color:var(--mint);box-shadow:0 0 0 3px rgba(198,218,201,.1)}
+.tree{overflow:auto;flex:1;padding:0 6px 20px}
+.tf{display:flex;align-items:center;gap:6px;width:100%;background:none;border:0;padding:6px 8px;color:var(--mute);font-size:12.5px;cursor:pointer;text-align:left;border-radius:6px}
+.tf:hover{color:var(--ink);background:var(--panel)}
+.tf .car{width:10px;display:inline-block;transition:transform .2s;font-size:9px}
+.tf.closed .car{transform:rotate(-90deg)}
+.tf.top{text-transform:uppercase;letter-spacing:.06em;font-size:11px;color:#6d7b74;margin-top:8px}
+.tf.sub{padding-left:20px;font-size:12px}
+.tf .n{margin-left:auto;font-size:11px;color:#5d6b64}
+.ti{display:flex;align-items:center;gap:8px;width:100%;background:none;border:0;padding:5px 8px 5px 26px;color:var(--ink);font-size:13.5px;cursor:pointer;text-align:left;border-radius:6px;transition:background .15s}
+.ti:hover{background:var(--panel)}
+.ti.on{background:#1a2a36;color:var(--mint)}
+.ti.sub{padding-left:38px}
+.ti .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.ti .dot{width:6px;height:6px;border-radius:50%;background:var(--or);flex:none}
+.ti .dot.ok{background:var(--good)}
+.ti .dot.loc{background:#7fb3d5}
+.ti .dot.err{background:#ff7a5c}
+.ti.custom .t::after{content:" ✎";color:var(--mute);font-size:11px}
+.ti.search-hit{padding-left:12px}
+.ti .where{font-size:11px;color:#5d6b64;white-space:nowrap}
+
+/* main */
+.main{display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--bg)}
+.tabs{display:flex;align-items:stretch;border-bottom:1px solid var(--line);background:var(--bg2);min-height:38px;overflow-x:auto}
+.tab{display:flex;align-items:center;gap:8px;padding:0 6px 0 14px;border-right:1px solid var(--line);color:var(--mute);font-size:13px;cursor:pointer;max-width:240px;min-width:0;background:none;border-top:0;border-left:0;border-bottom:0;position:relative;transition:color .2s,background .2s}
+.tab span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;text-align:left}
+.tab:hover{color:var(--ink)}
+.tab.on{color:var(--ink);background:var(--bg)}
+.tab.on::before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:var(--or)}
+.tab .x{width:20px;height:20px;border-radius:5px;display:grid;place-items:center;color:var(--mute);font-size:14px;border:0;background:none;cursor:pointer;flex:none}
+.tab .x:hover{background:#1f2b36;color:var(--ink)}
+.bar{display:flex;align-items:center;gap:8px;padding:8px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.ttl{flex:1;min-width:160px;background:none;border:0;font-family:"Barlow Condensed",sans-serif;font-size:30px;font-weight:600;color:var(--mint);padding:0;letter-spacing:.01em}
+.ttl:focus{outline:none;border-bottom:1px solid var(--or)}
+.ttl[readonly]{cursor:default}
+.fmt{display:flex;gap:2px;border:1px solid var(--line);border-radius:7px;padding:2px}
+.fmt button,.modes button{background:none;border:0;color:var(--mute);padding:5px 8px;border-radius:5px;cursor:pointer;font-size:12.5px;min-width:30px;transition:color .15s,background .15s}
+.fmt button:hover,.modes button:hover{color:var(--ink);background:var(--panel2)}
+.fmt button b,.fmt button i{font-size:13px}
+.modes{display:flex;gap:2px;border:1px solid var(--line);border-radius:7px;padding:2px}
+.modes button[aria-pressed=true]{background:var(--mint);color:var(--bg);font-weight:700}
+.exp{position:relative}
+.menu{position:absolute;right:0;top:calc(100% + 6px);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px;min-width:230px;box-shadow:0 20px 40px -10px rgba(0,0,0,.6);z-index:5;display:none}
+.menu.open{display:block;animation:pop .2s cubic-bezier(.3,1.3,.5,1)}
+@keyframes pop{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.menu button{display:block;width:100%;text-align:left;background:none;border:0;padding:9px 10px;border-radius:7px;color:var(--ink);cursor:pointer;font-size:13px}
+.menu button:hover{background:var(--panel2)}
+.menu button small{display:block;color:var(--mute);font-size:11.5px}
+.menu button:disabled{opacity:.4;cursor:not-allowed}
+.menu hr{border:0;border-top:1px solid var(--line);margin:5px 0}
+
+.panes{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;overflow:hidden}
+.mode-edit .pv{display:none}
+.mode-read .ed{display:none}
+.mode-read .panes{grid-template-columns:1fr}
+.mode-edit .panes{grid-template-columns:1fr}
+.ed{width:100%;height:100%;resize:none;background:var(--bg);border:0;outline:none;padding:22px 26px 60px;font:400 14.5px/1.75 "JetBrains Mono",ui-monospace,monospace;color:#cfdcd2;border-right:1px solid var(--line);tab-size:2}
+.ed::placeholder{color:#4d5b54}
+.pv{overflow:auto;padding:22px 34px 70px;min-width:0}
+.md{max-width:72ch;font-size:15.5px;line-height:1.75}
+.md h1{font-family:"Barlow Condensed",sans-serif;font-size:44px;line-height:1;color:var(--mint);margin:.2em 0 .5em;font-weight:700;letter-spacing:.005em}
+.md h2{font-family:"Barlow Condensed",sans-serif;font-size:30px;margin:1.3em 0 .4em;font-weight:600;color:var(--ink)}
+.md h3{font-size:18px;margin:1.2em 0 .3em;font-weight:700;color:var(--ink)}
+.md p{margin:.6em 0}
+.md blockquote{margin:.9em 0;padding:4px 16px;border-left:3px solid var(--or);color:var(--mute);background:rgba(255,91,53,.04);border-radius:0 6px 6px 0}
+.md code{font:400 13px "JetBrains Mono",monospace;background:#17222c;border:1px solid var(--line);padding:1px 6px;border-radius:5px;color:#e6d3a3}
+.md pre{background:#0d141b;border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow:auto;font-size:13px}
+.md pre code{background:none;border:0;padding:0;color:#cfdcd2}
+.md ul,.md ol{padding-left:22px;margin:.5em 0}
+.md li{margin:.25em 0}
+.md ul.tasks{list-style:none;padding-left:4px}
+.md ul.tasks li{display:flex;gap:10px;align-items:flex-start}
+.md ul.tasks input{margin-top:6px;accent-color:var(--mint);width:15px;height:15px;cursor:pointer}
+.md ul.tasks li.done{color:var(--mute);text-decoration:line-through;text-decoration-color:#3a4a55}
+.md hr{border:0;border-top:1px solid var(--line);margin:1.6em 0}
+.md a{color:var(--mint);text-decoration:none;border-bottom:1px solid rgba(198,218,201,.35)}
+.md a:hover{border-bottom-color:var(--or);color:var(--or)}
+.md a.wl{color:var(--or);border-bottom:1px dashed rgba(255,91,53,.5);cursor:pointer}
+.md a.wl:hover{border-bottom-style:solid}
+.md a.wl.missing{color:#8d9a94;border-bottom-color:#3a4a55}
+.md[data-empty]::before{content:"Start writing…";color:#4d5b54}
+
+/* empty */
+.empty{flex:1;display:grid;place-items:center;text-align:center;padding:40px;color:var(--mute)}
+.empty h2{font-family:"Barlow Condensed",sans-serif;font-size:40px;color:var(--mint);margin:0 0 6px;font-weight:700}
+.empty p{max-width:46ch;margin:0 auto 18px}
+.empty .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+/* status */
+.status{height:28px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 14px;font-size:12px;color:var(--mute);background:var(--bg2)}
+.status .s-ok{color:var(--good)}
+.status .s-warn{color:var(--or)}
+
+/* right panel */
+.rp h4{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:#6d7b74;margin:18px 16px 8px;font-weight:600;display:flex;justify-content:space-between}
+.rp .emp{margin:0 16px;font-size:12.5px;color:#5d6b64}
+.ol{margin:0;padding:0}
+.ol button{display:block;width:100%;background:none;border:0;text-align:left;padding:4px 16px;color:var(--mute);font-size:12.5px;cursor:pointer;border-radius:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ol button:hover{color:var(--ink);background:var(--panel)}
+.ol button.h2{padding-left:26px}
+.ol button.h3{padding-left:36px}
+.bl{margin:0;padding:0}
+.bl button{display:block;width:100%;background:none;border:0;text-align:left;padding:6px 16px;color:var(--ink);font-size:13px;cursor:pointer}
+.bl button:hover{background:var(--panel);color:var(--mint)}
+.bl small{display:block;color:#5d6b64;font-size:11.5px}
+.props{margin:0 16px;display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:12.5px}
+.props dt{color:#5d6b64}
+.props dd{margin:0;color:var(--ink);overflow:hidden;text-overflow:ellipsis}
+
+/* quick open */
+.qmodal{position:fixed;inset:0;background:rgba(5,8,12,.6);backdrop-filter:blur(2px);display:none;align-items:flex-start;justify-content:center;padding-top:12vh;z-index:40}
+.qmodal.open{display:flex;animation:fade .2s}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.qbox{width:min(560px,92vw);background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6);animation:pop .25s cubic-bezier(.3,1.3,.5,1)}
+.qbox input{width:100%;background:none;border:0;border-bottom:1px solid var(--line);padding:16px 18px;font-size:16px;outline:none}
+.qlist{max-height:52vh;overflow:auto;padding:6px}
+.qlist button{display:flex;justify-content:space-between;gap:12px;width:100%;background:none;border:0;padding:10px 12px;border-radius:8px;color:var(--ink);cursor:pointer;text-align:left;font-size:14px}
+.qlist button.sel,.qlist button:hover{background:#1a2a36;color:var(--mint)}
+.qlist button small{color:#5d6b64;font-size:12px;white-space:nowrap}
+.qlist .none{padding:14px;color:var(--mute);font-size:13px}
+
+.toast{position:fixed;left:50%;bottom:40px;transform:translateX(-50%);background:var(--mint);color:var(--bg);padding:10px 16px;border-radius:8px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .25s;z-index:50;font-size:13px}
+
+@media(max-width:1100px){:root{--rp:0px}.rp{display:none}}
+@media(max-width:760px){:root{--sb:0px}.side{display:none}.ws.show-l .side{display:flex;position:fixed;z-index:20;top:52px;bottom:0;left:0;width:260px;box-shadow:0 0 40px rgba(0,0,0,.5)}.panes{grid-template-columns:1fr}.mode-split .pv{display:none}.mode-split .ed{display:block}.crumbs{display:none}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="l">
+    <button class="ib" id="tglL" aria-label="Toggle file tree" aria-pressed="true">☰</button>
+    <a class="brand" id="home" href="Nox – Agentic Orchestration e-learning (1).html" aria-label="Back to Nox workspace" title="Return to Nox workspace">
+      <img src="assets/nox-logo.png" alt="Nox Logo" width="24" height="24">
+      Nox
+    </a>
+    <span class="crumbs" id="crumb">Notes</span>
+  </div>
+  <div class="r">
+    <span class="pill" id="netstate" style="cursor:pointer;" title="Click to sign in via Nox Portal">Connecting…</span>
+    <a href="Nox – Agentic Orchestration e-learning (1).html" class="ib" style="text-decoration:none;" title="Course workspace">Course</a>
+    <a href="Nox – Your progress.html" class="ib" style="text-decoration:none;" title="Progress dashboard">Progress</a>
+    <a href="Nox – Profile.html" class="ib" style="text-decoration:none;" title="Learner profile">Profile</a>
+    <button class="btn ghost" id="qbtn">Quick open <kbd>Ctrl O</kbd></button>
+    <button class="btn" id="newBtn">New note</button>
+    <button class="ib" id="tglR" aria-label="Toggle side panel" aria-pressed="true">Panel</button>
+  </div>
+</header>
+
+<div class="ws" id="ws">
+  <aside class="side" aria-label="Files">
+    <div class="sh"><b>Nox Vault</b><span id="vcount"></span></div>
+    <input class="search" id="search" type="search" placeholder="Search notes…" aria-label="Search notes">
+    <div class="tree" id="tree"></div>
+  </aside>
+
+  <main class="main" id="main">
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <div class="bar" id="bar" hidden>
+      <input class="ttl" id="ttl" aria-label="Note title" maxlength="80">
+      <div class="fmt" aria-label="Formatting">
+        <button data-act="bold" title="Bold (Ctrl+B)"><b>B</b></button>
+        <button data-act="italic" title="Italic (Ctrl+I)"><i>I</i></button>
+        <button data-act="h2" title="Heading">H</button>
+        <button data-act="code" title="Code">{ }</button>
+        <button data-act="ul" title="List">•</button>
+        <button data-act="task" title="Checkbox">☐</button>
+        <button data-act="link" title="Link">↗</button>
+        <button data-act="wiki" title="Link to a note (Ctrl+L)">[[ ]]</button>
+      </div>
+      <div class="modes" role="group" aria-label="View mode">
+        <button data-mode="edit" aria-pressed="false">Edit</button>
+        <button data-mode="split" aria-pressed="true">Split</button>
+        <button data-mode="read" aria-pressed="false">Read</button>
+      </div>
+      <div class="exp" id="exp">
+        <button class="btn ghost" id="expBtn" aria-haspopup="true" aria-expanded="false">Export</button>
+        <div class="menu" id="menu" role="menu">
+          <button id="expNote" role="menuitem">Export this note<small>.md with frontmatter, links kept</small></button>
+          <button id="expVault" role="menuitem">Export all notes<small>.zip · folders become Obsidian folders</small></button>
+          <hr>
+          <button id="resetNote" role="menuitem" hidden>Reset to course text<small>Discards your edits to this lesson note</small></button>
+          <button id="delNote" role="menuitem" hidden>Delete note</button>
+        </div>
+      </div>
+    </div>
+    <div class="panes mode-split" id="panes" hidden>
+      <textarea class="ed" id="ed" spellcheck="true" placeholder="Write in markdown. Link notes with [[Note title]]."></textarea>
+      <article class="pv md" id="pv" aria-live="polite"></article>
+    </div>
+    <div class="empty" id="empty"></div>
+    <footer class="status" id="status"><span id="savestate">Ready</span><span id="counts"></span><span id="blcount"></span></footer>
+  </main>
+
+  <aside class="rp" id="rp" aria-label="Note details">
+    <h4>Outline</h4>
+    <nav class="ol" id="outline"></nav>
+    <h4>Linked from <span id="bcn"></span></h4>
+    <div class="bl" id="back"></div>
+    <h4>Properties</h4>
+    <dl class="props" id="props"></dl>
+  </aside>
+</div>
+
+<div class="qmodal" id="qmodal" role="dialog" aria-modal="true" aria-label="Quick open">
+  <div class="qbox">
+    <input id="qin" placeholder="Open a note…" aria-label="Open a note" autocomplete="off">
+    <div class="qlist" id="qlist"></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const APP_URL="Nox – Agentic Orchestration e-learning (1).html";
+const PORTAL_URL="Nox Portal – Sign in.html";
+const LOCAL_KEY="nox-notes-v1";
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pad=n=>String(n).padStart(2,"0");
+
+/* ---------- course content (default text, not stored until edited) ---------- */
+const MODS=[
+ {t:"Foundations & handoffs",lessons:[
+  {id:"1.1",t:"Agentic foundations & tool use",s:"What an AI agent is, and how it uses apps for you.",
+   body:"An AI agent is a model that works toward a goal in steps. It reads a request, decides what to do next, uses a tool such as a calendar, a spreadsheet or a search, then checks the result before it continues.",
+   ideas:["A tool is any action an agent can take on your behalf.","Work happens in steps, so you can check each one.","Clear goals and limits produce better results than vague ones."],
+   try:"Pick a task you repeat each week. Write down the steps you take and the apps you use."},
+  {id:"1.2",t:"Multi-agent handoffs",s:"Passing work between agents without losing context.",
+   body:"A handoff passes work from one agent to another along with the context it needs. A good handoff carries the goal, what is already finished, and what is still open.",
+   ideas:["Each agent should have one clear role.","Context gets lost at handoffs, so write it down.","A router decides which agent receives each request."],
+   try:"Write a short brief that a colleague could follow: the goal, what is finished, and what comes next."},
+  {id:"1.3",t:"Model Context Protocol (MCP)",s:"One standard way to plug your tools into any agent.",
+   body:"MCP is an open standard that lets agents connect to tools and data in one consistent way. A tool describes what it can do once, and any MCP-aware agent can use it.",
+   ideas:["A server exposes tools; the agent using them is the client.","Permissions decide what an agent can read or change.","Start with read-only access and widen it later."],
+   try:"List three tools you use every day and note what an agent should be allowed to read, and what it should never change."},
+  {id:"1.4",t:"Supervisor & worker patterns",s:"One agent plans, others do the tasks.",
+   body:"A supervisor agent plans the work and splits it into subtasks. Worker agents each take one piece and report back. The supervisor checks the results and decides what happens next.",
+   ideas:["Subtasks should be small enough to check.","The supervisor owns the final answer.","Workers carry out tasks; they don’t set the overall plan."],
+   try:"Break a project you have into five subtasks. Which one would you hand to a worker agent first?"}]},
+ {t:"Advanced deployment",lessons:[
+  {id:"2.1",t:"Guardrails & AI safety",s:"Keeping agents inside the lines you set.",
+   body:"Guardrails are rules that keep an agent inside boundaries you set: what it may touch, what it may say, and when it must stop.",
+   ideas:["Limit tools to what the task actually needs.","Check outputs before they reach a customer.","Keep a log of actions so mistakes can be traced."],
+   try:"Write down three things your agent must never do without asking you first."},
+  {id:"2.2",t:"Human-in-the-loop",s:"Where you approve, edit or stop an agent.",
+   body:"Some steps should always wait for a person, such as sending money, publishing a post or messaging a client. A confirmation loop shows you the proposed action so you can approve, edit or stop it.",
+   ideas:["Approve high-impact actions; automate low-risk ones.","Make each proposal readable in a few seconds.","Track how often you edit proposals to tune the agent."],
+   try:"Choose one action that always needs approval, and one that can run without you."}]},
+ {t:"Going further",lessons:[
+  {id:"3.1",t:"Memory & context",s:"What agents remember, and what they should forget.",
+   body:"Agents can keep notes between sessions, but memory needs managing. Store what helps the next task, and forget what is stale, private or wrong.",
+   ideas:["Short-term memory lives inside one conversation.","Long-term memory should be reviewed regularly.","Relevant context usually beats more context."],
+   try:"List three facts an agent should remember about your business or studies, and one thing it should forget."},
+  {id:"3.2",t:"Testing & monitoring",s:"Check results, catch mistakes, track cost.",
+   body:"Before you trust an agent, test it on examples where you already know the right answer. After launch, keep watching results, errors and cost over time.",
+   ideas:["Build a small set of realistic test cases.","Watch for silent failures that look like success.","Track cost per task, not just the monthly bill."],
+   try:"Write five inputs your agent should handle, and the output you expect for each one."},
+  {id:"3.3",t:"Ship your first workflow",s:"Build a small agent team for your own work.",
+   body:"A small agent team completes one real job from start to finish, with a person approving the key steps. Start with a task you already do by hand.",
+   ideas:["Pick one task you repeat.","Run it on sample data before real data.","Review after a week and adjust."],
+   try:"Write the workflow in five steps, and mark the step where you want to approve before anything happens."}]}
+];
+const FLAT=[];MODS.forEach((m,mi)=>m.lessons.forEach((l,li)=>FLAT.push({l,mi,li,m})));
+const titleOf=l=>`${l.id} ${l.t}`;
+
+function courseDefault(i){
+ const {l,mi,m}=FLAT[i],prev=FLAT[i-1],next=FLAT[i+1];
+ return [`# ${titleOf(l)}`,"",`> ${l.s}`,"",l.body,"","## Key ideas","",...l.ideas.map(x=>`- ${x}`),"","## Try it","",`- [ ] ${l.try}`,"","## My notes","","","## Links","",
+  `- Module: ${m.t}`,
+  prev?`- Previous: [[${titleOf(prev.l)}]]`:"- Start of the course",
+  next?`- Next: [[${titleOf(next.l)}]]`:"- End of the course"].join("\n");
+}
+
+/* ---------- state ---------- */
+const NOTES={};            // id -> note
+const DEFAULTS={};         // course id -> default body
+const tabs=[];             // open note ids
+let active=null, mode="split", store=null, saveTimer=null, previewTimer=null, collapsed=new Set(), searchQ="", loaded=false;
+const chains={};
+
+FLAT.forEach((f,i)=>{const id="c-"+f.l.id,body=courseDefault(i);DEFAULTS[id]=body;
+ NOTES[id]={id,kind:"course",lessonId:f.l.id,module:f.mi+1,title:titleOf(f.l),folder:`Course/Module ${f.mi+1} · ${f.m.t}`,body,customized:false,save:"saved",ver:0,dirty:false,unsaved:false}});
+
+function newPersonal(id,title,body){return {id,kind:"personal",title,folder:"Personal",body,customized:true,save:"saved",ver:0,dirty:false,unsaved:false}}
+function uniqueTitle(base){let t=base,k=2;const taken=new Set(Object.values(NOTES).map(n=>n.title.toLowerCase()));while(taken.has(t.toLowerCase()))t=`${base} ${k++}`;return t}
+
+/* ---------- links & markdown ---------- */
+function resolve(target){
+ const k=target.trim().toLowerCase();
+ const byTitle=Object.values(NOTES).find(n=>n.title.toLowerCase()===k);
+ if(byTitle)return byTitle;
+ return Object.values(NOTES).find(n=>n.kind==="course"&&n.lessonId.toLowerCase()===k)||null;
+}
+function wikiTargets(body){const out=[];body.replace(/\[\[([^\]]+)\]\]/g,(_,t)=>{out.push(t.split("|")[0].trim());return _});return out}
+function headingsOf(body){const hs=[],lines=body.split("\n");let fence=false;lines.forEach((ln,i)=>{if(/^```/.test(ln)){fence=!fence;return}if(fence)return;const m=/^(#{1,3})\s+(.+)$/.exec(ln);if(m)hs.push({level:m[1].length,text:m[2].trim(),line:i})});return hs}
+
+function inline(raw){
+ const slots=[];const stash=h=>{slots.push(h);return "\u0000"+(slots.length-1)+"\u0000"};
+ let s=raw.replace(/`([^`]+)`/g,(_,c)=>stash(`<code>${esc(c)}</code>`));
+ s=s.replace(/\[\[([^\]]+)\]\]/g,(_,t)=>{const target=t.split("|")[0].trim(),label=(t.split("|")[1]||target).trim(),n=resolve(target);
+  return stash(n?`<a class="wl" href="#" data-open="${n.id}">${esc(label)}</a>`:`<a class="wl missing" href="#" data-create="${esc(target)}">${esc(label)}</a>`)});
+ s=s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,(_,t,u)=>stash(`<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(t)}</a>`));
+ s=esc(s).replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>").replace(/(^|[^*\w])\*([^*\s][^*]*)\*/g,"$1<em>$2</em>");
+ return s.replace(/\u0000(\d+)\u0000/g,(_,i)=>slots[+i]);
+}
+
+function renderMd(body){
+ const lines=body.split("\n"),out=[];let list=null,para=[],fence=null,hi=0;
+ const flushP=()=>{if(para.length){out.push(`<p>${inline(para.join(" "))}</p>`);para=[]}};
+ const flushL=()=>{if(list){out.push(`</${list.tag}>`);list=null}};
+ lines.forEach((ln,i)=>{
+  if(fence!==null){if(/^```/.test(ln)){out.push(`<pre><code>${esc(fence.join("\n"))}</code></pre>`);fence=null}else fence.push(ln);return}
+  if(/^```/.test(ln)){flushP();flushL();fence=[];return}
+  if(!ln.trim()){flushP();flushL();return}
+  let m;
+  if((m=/^(#{1,3})\s+(.+)$/.exec(ln))){flushP();flushL();const lv=m[1].length;out.push(`<h${lv} id="hd-${hi++}">${inline(m[2])}</h${lv}>`);return}
+  if(/^---+\s*$/.test(ln)){flushP();flushL();out.push("<hr>");return}
+  if((m=/^>\s?(.*)$/.exec(ln))){flushP();flushL();out.push(`<blockquote>${inline(m[1])}</blockquote>`);return}
+  if((m=/^\s*[-*]\s\[( |x|X)\]\s(.*)$/.exec(ln))){flushP();if(!list||list.tag!=="ul.tasks"){flushL();out.push('<ul class="tasks">');list={tag:"ul.tasks"}}
+   const done=m[1].toLowerCase()==="x";out.push(`<li class="${done?"done":""}"><input type="checkbox" data-task="${i}" ${done?"checked":""} aria-label="Toggle task"><span>${inline(m[2])}</span></li>`);return}
+  if((m=/^\s*[-*]\s+(.*)$/.exec(ln))){flushP();if(!list||list.tag!=="ul"){flushL();out.push("<ul>");list={tag:"ul"}}out.push(`<li>${inline(m[1])}</li>`);return}
+  if((m=/^\s*\d+\.\s+(.*)$/.exec(ln))){flushP();if(!list||list.tag!=="ol"){flushL();out.push("<ol>");list={tag:"ol"}}out.push(`<li>${inline(m[1])}</li>`);return}
+  flushL();para.push(ln.trim());
+ });
+ if(fence!==null)out.push(`<pre><code>${esc(fence.join("\n"))}</code></pre>`);
+ flushP();flushL();
+ return out.join("\n");
+}
+
+/* ---------- persistence ---------- */
+function toDoc(n){const d={kind:n.kind,title:n.title,folder:n.folder,body:n.body,updated:new Date().toISOString()};if(n.kind==="course"){d.lessonId=n.lessonId;d.module=n.module}return d}
+function readLocal(){try{return JSON.parse(localStorage.getItem(LOCAL_KEY)||"{}")||{}}catch(e){return {}}}
+function writeLocal(map){try{localStorage.setItem(LOCAL_KEY,JSON.stringify(map))}catch(e){}}
+function queue(id,fn){chains[id]=(chains[id]||Promise.resolve()).then(fn,fn);return chains[id]}
+
+async function persist(n){
+ const ver=n.ver;n.save="saving";renderStatus();
+ try{
+  if(store.kind==="db"){
+   if(n.kind==="course"&&!n.customized)await queue(n.id,()=>store.coll.doc(n.id).delete());
+   else await queue(n.id,()=>store.coll.doc(n.id).set(toDoc(n)));
+  }else{
+   const map=readLocal();if(n.kind==="course"&&!n.customized)delete map[n.id];else map[n.id]=toDoc(n);writeLocal(map);
+  }
+  n.unsaved=false;
+  if(n.ver===ver){n.dirty=false;n.save=store.kind==="db"?"saved":"local"}else n.save="saving";
+  n.tries=0;
+ }catch(e){
+  n.tries=(n.tries||0)+1;n.save="error";
+  if(n.tries<4)setTimeout(()=>persist(n),2000*n.tries);
+ }
+ renderStatus();renderTree();
+}
+function scheduleSave(n){n.dirty=true;n.ver++;n.save="dirty";renderStatus();clearTimeout(n._t);n._t=setTimeout(()=>persist(n),700)}
+
+function applyRemote(entries){
+ const seen=new Set();
+ entries.forEach(({id,data})=>{
+  seen.add(id);const d=data||{};
+  if(id.startsWith("p-")){
+   const n=NOTES[id];
+   if(!n){NOTES[id]=newPersonal(id,d.title||"Untitled",d.body||"");NOTES[id].unsaved=false}
+   else if(!n.dirty&&!n.unsaved){n.title=d.title||n.title;n.body=d.body??n.body}
+  }else if(id.startsWith("c-")&&NOTES[id]){
+   const n=NOTES[id];n.customized=true;
+   if(!n.dirty&&!n.unsaved)n.body=d.body??n.body;
+  }
+ });
+ Object.values(NOTES).forEach(n=>{
+  if(seen.has(n.id)||n.dirty||n.unsaved)return;
+  if(n.kind==="personal"){delete NOTES[n.id];closeTab(n.id,true)}
+  else{n.customized=false;n.body=DEFAULTS[n.id]}
+ });
+ if(!loaded){loaded=true;clearTimeout(store.timer)}
+ renderAll();
+}
+
+async function connect(){
+ const cap=n=>(window.claude&&window.claude.use)?window.claude.use(n).catch(()=>null):Promise.resolve(null);
+ const [db,user,dl]=await Promise.all([cap("db"),cap("user"),cap("downloads")]);
+ store={kind:"local",dl};
+ if(db&&user){
+  try{
+   const uid=await user.id();
+   if(uid){
+    const coll=db.collection("data/users/"+uid);
+    store={kind:"db",coll,dl};
+    store.timer=setTimeout(()=>{if(!loaded)setNet("warn","Notes can’t be reached yet")},10000);
+    coll.onSnapshot(snap=>{
+     const entries=snap.docs.map(d=>({id:d.id,data:d.data()}));
+     if(!snap.metadata.fromCache)setNet("ok","Synced");
+     applyRemote(entries);
+    },err=>{setNet("warn","Notes offline · "+(err&&err.code?err.code:"error"))});
+    setNet("ok","Synced");
+    return;
+   }
+  }catch(e){}
+ }
+ const map=readLocal();
+ applyRemote(Object.entries(map).map(([id,d])=>({id,data:d})));
+ setNet("local",dlNote());
+ loaded=true;
+}
+function dlNote(){return"Saved in this browser"}
+function setNet(kind,msg){const p=$("#netstate");p.className="pill "+(kind==="ok"?"ok":kind==="warn"?"warn":"");p.textContent=kind==="local"?"Browser only":msg;
+ if(kind==="local"){p.title="Sign in to sync your notes across devices";p.textContent="Browser only · sign in to sync"}}
+
+/* ---------- tabs ---------- */
+function open(id,focus=true){
+ if(!NOTES[id])return;
+ if(!tabs.includes(id)){tabs.push(id);if(tabs.length>5){const drop=tabs.find(t=>t!==id);tabs.splice(tabs.indexOf(drop),1)}}
+ active=id;renderAll();
+ if(focus&&mode!=="read"){$("#ed").focus()}
+}
+function closeTab(id,quiet){
+ const i=tabs.indexOf(id);if(i<0)return;tabs.splice(i,1);
+ if(active===id){active=tabs[i]||tabs[i-1]||null}
+ if(!quiet)renderAll();
+}
+function createNote(title){
+ const id="p-"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+ const n=newPersonal(id,uniqueTitle(title||"Untitled"),`# ${title||"Untitled"}\n\n`);
+ n.unsaved=true;NOTES[id]=n;open(id);
+ n.dirty=true;n.ver++;persist(n);
+ setTimeout(()=>{const ed=$("#ed");ed.focus();ed.setSelectionRange(ed.value.length,ed.value.length)},0);
+ return n;
+}
+
+/* ---------- renderers ---------- */
+function renderAll(){renderTree();renderTabs();renderEditor();renderRight();renderStatus();renderCrumb();renderEmpty()}
+
+function renderTabs(){
+ $("#tabs").innerHTML=tabs.map(id=>{const n=NOTES[id];return n?`<button class="tab ${id===active?"on":""}" role="tab" aria-selected="${id===active}" data-tab="${id}"><span>${esc(n.title)}</span><span class="x" data-close="${id}" aria-label="Close tab">×</span></button>`:""}).join("");
+}
+
+function renderTree(){
+ const q=searchQ.trim().toLowerCase();
+ const all=Object.values(NOTES);
+ $("#vcount").textContent=all.length+" notes";
+ if(q){
+  const hits=all.filter(n=>n.title.toLowerCase().includes(q)||n.body.toLowerCase().includes(q)).sort((a,b)=>a.title.localeCompare(b.title));
+  $("#tree").innerHTML=hits.length?hits.map(n=>`<button class="ti search-hit ${n.id===active?"on":""}" data-open="${n.id}"><span class="t">${esc(n.title)}</span><span class="where">${esc(n.kind==="course"?"Course":"Personal")}</span></button>`).join(""):`<p style="color:var(--mute);padding:10px 14px;font-size:13px">No notes match “${esc(searchQ)}”.</p>`;
+  return;
+ }
+ const tops=["Course","Personal"];
+ let html="";
+ tops.forEach(top=>{
+  const inTop=all.filter(n=>n.folder.split("/")[0]===top);
+  if(!inTop.length&&top==="Personal"){html+=`<button class="tf top ${collapsed.has(top)?"closed":""}" data-folder="${top}"><span class="car">▼</span>Personal<span class="n">0</span></button><div class="grp" ${collapsed.has(top)?"hidden":""}><button class="ti" data-new="1"><span class="t" style="color:var(--mute)">+ New note</span></button></div>`;return}
+  if(!inTop.length)return;
+  html+=`<button class="tf top ${collapsed.has(top)?"closed":""}" data-folder="${top}"><span class="car">▼</span>${top}<span class="n">${inTop.length}</span></button>`;
+  const subs=[...new Set(inTop.map(n=>n.folder))];
+  html+=`<div ${collapsed.has(top)?"hidden":""}>`;
+  subs.forEach(sf=>{
+   const label=sf.includes("/")?sf.split("/").slice(1).join("/"):"";
+   const items=inTop.filter(n=>n.folder===sf).sort((a,b)=>(a.lessonId||a.title).localeCompare(b.lessonId||b.title,undefined,{numeric:true}));
+   if(label)html+=`<button class="tf sub ${collapsed.has(sf)?"closed":""}" data-folder="${esc(sf)}"><span class="car">▼</span>${esc(label)}<span class="n">${items.length}</span></button>`;
+   html+=`<div ${collapsed.has(sf)?"hidden":""}>`;
+   items.forEach(n=>{
+    const dot=n.save==="error"?"err":n.save==="saving"||n.save==="dirty"?"":n.save==="local"?"loc":"ok";
+    const showDot=n.dirty||n.unsaved||n.save==="error";
+    html+=`<button class="ti ${label?"sub":""} ${n.id===active?"on":""} ${n.customized&&n.kind==="course"?"custom":""}" data-open="${n.id}"><span class="t">${esc(n.title)}</span>${showDot?`<span class="dot ${dot}" title="${esc(n.save)}"></span>`:""}</button>`;
+   });
+   html+="</div>";
+  });
+  html+="</div>";
+ });
+ $("#tree").innerHTML=html;
+}
+
+function renderEditor(){
+ const n=active&&NOTES[active];
+ const hasNote=!!n;
+ $("#bar").hidden=!hasNote;$("#panes").hidden=!hasNote;$("#empty").style.display=hasNote?"none":"flex";
+ if(!hasNote){renderEmpty();return}
+ const ttl=$("#ttl");ttl.value=n.title;ttl.readOnly=n.kind==="course";ttl.title=n.kind==="course"?"Course note titles are fixed":"Rename note";
+ const ed=$("#ed");if(ed.value!==n.body)ed.value=n.body;
+ const pv=$("#pv");pv.innerHTML=n.body.trim()?renderMd(n.body):"";pv.toggleAttribute("data-empty",!n.body.trim());
+ $("#resetNote").hidden=!(n.kind==="course"&&n.customized);
+ $("#delNote").hidden=n.kind!=="personal";
+ $("#panes").className="panes mode-"+mode;
+ $$("[data-mode]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.mode===mode));
+ $("#crumb").innerHTML=`${esc(n.folder.replace(/\//g," › "))} › <b>${esc(n.title)}</b>`;
+}
+
+function renderEmpty(){
+ if(active&&NOTES[active])return;
+ const first=FLAT.slice(0,2).map(f=>`<button class="btn ghost" data-open="c-${f.l.id}">Open ${f.l.id} ${esc(f.l.t)}</button>`).join("");
+ $("#empty").innerHTML=`<div><h2>Your notes</h2><p>Open a lesson note to read it beside its exercises, or start a note of your own. Link notes with <b>[[double brackets]]</b>.</p><div class="row"><button class="btn" id="emptyNew">New note</button>${first}</div></div>`;
+ $("#empty").style.display="flex";
+}
+
+function renderRight(){
+ const n=active&&NOTES[active];
+ const hs=n?headingsOf(n.body):[];
+ $("#outline").innerHTML=hs.length?hs.map((h,i)=>`<button class="h${h.level}" data-hd="${i}" data-line="${h.line}" title="${esc(h.text)}">${esc(h.text)}</button>`).join(""):`<p class="emp">No headings yet.</p>`;
+ const back=n?Object.values(NOTES).filter(o=>o.id!==n.id&&wikiTargets(o.body).some(t=>{const r=resolve(t);return r&&r.id===n.id})):[];
+ $("#bcn").textContent=back.length?back.length:"";
+ $("#back").innerHTML=!n?"":back.length?back.map(o=>`<button data-open="${o.id}">${esc(o.title)}<small>${esc(o.folder)}</small></button>`).join(""):`<p class="emp">No notes link here yet.</p>`;
+ if(!n){$("#props").innerHTML="";return}
+ const words=n.body.trim()?n.body.trim().split(/\s+/).length:0;
+ const rows=[["Type",n.kind==="course"?"Course lesson":"Personal note"],["Folder",n.folder],n.lessonId?["Lesson",n.lessonId]:null,["Words",words],["Saved",stateLabel(n)]].filter(Boolean);
+ let propsHtml=rows.map(([k,v])=>`<dt>${k}</dt><dd>${esc(v)}</dd>`).join("");
+ if(n.lessonId){
+  propsHtml+=`<div style="grid-column:1/-1;margin-top:10px;"><button class="btn ghost" style="width:100%;font-size:12px;padding:6px 10px;" data-jump-lesson="${n.lessonId}">Open in Course →</button></div>`;
+ }
+ $("#props").innerHTML=propsHtml;
+ $("#blcount").textContent=back.length?`${back.length} backlink${back.length>1?"s":""}`:"No backlinks";
+}
+function stateLabel(n){return n.save==="saved"?"Synced":n.save==="local"?"In this browser":n.save==="saving"?"Saving…":n.save==="dirty"?"Unsaved changes":n.save==="error"?"Couldn’t save — retrying":"Ready"}
+
+function renderStatus(){
+ const n=active&&NOTES[active];
+ const s=$("#savestate");
+ if(!n){s.textContent="Ready";s.className="";$("#counts").textContent="";return}
+ s.textContent=stateLabel(n);s.className=n.save==="saved"||n.save==="local"?"s-ok":n.save==="error"?"s-warn":"";
+ const words=n.body.trim()?n.body.trim().split(/\s+/).length:0;
+ $("#counts").textContent=`${words} words · ${n.body.length} characters`;
+}
+function renderCrumb(){if(!active||!NOTES[active])$("#crumb").textContent="Notes"}
+
+/* ---------- editing ---------- */
+function setBody(n,body){
+ n.body=body;
+ if(n.kind==="course")n.customized=body!==DEFAULTS[n.id];
+ scheduleSave(n);
+ clearTimeout(previewTimer);
+ previewTimer=setTimeout(()=>{const pv=$("#pv");pv.innerHTML=body.trim()?renderMd(body):"";pv.toggleAttribute("data-empty",!body.trim());renderRight();renderStatus();renderTree()},120);
+}
+function editorWrap(before,after,ph){
+ const ed=$("#ed"),s=ed.selectionStart,e=ed.selectionEnd,sel=ed.value.slice(s,e)||ph;
+ const next=ed.value.slice(0,s)+before+sel+after+ed.value.slice(e);
+ ed.value=next;ed.setSelectionRange(s+before.length,s+before.length+sel.length);
+ setBody(NOTES[active],next);
+}
+function editorLine(prefix){
+ const ed=$("#ed"),s=ed.selectionStart,ls=ed.value.lastIndexOf("\n",s-1)+1;
+ const next=ed.value.slice(0,ls)+prefix+ed.value.slice(ls);
+ ed.value=next;ed.setSelectionRange(s+prefix.length,s+prefix.length);
+ setBody(NOTES[active],next);
+}
+function formatAct(a){
+ if(!active)return;
+ if(mode==="read")setMode("split");
+ ({bold:()=>editorWrap("**","**","bold"),italic:()=>editorWrap("*","*","italic"),code:()=>editorWrap("`","`","code"),
+   link:()=>editorWrap("[","](https://)","text"),wiki:()=>editorWrap("[[","]]","Note title"),
+   h2:()=>editorLine("## "),ul:()=>editorLine("- "),task:()=>editorLine("- [ ] ")})[a]?.();
+}
+function setMode(m){mode=m;if(active)renderEditor();if(m!=="read")$("#ed").focus()}
+
+function renameNote(n,newTitle){
+ const t=newTitle.trim().slice(0,80);if(!t||t===n.title)return renderEditor();
+ if(resolve(t)&&resolve(t).id!==n.id){toast("A note with that title already exists");return renderEditor()}
+ const old=n.title;n.title=t;
+ Object.values(NOTES).forEach(o=>{
+  if(o.id===n.id)return;
+  const re=new RegExp(`\\[\\[${old.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")}(\\|[^\\]]*)?\\]\\]`,"g");
+  if(re.test(o.body)){o.body=o.body.replace(re,(_,a)=>`[[${t}${a||""}]]`);scheduleSave(o)}
+ });
+ scheduleSave(n);renderAll();
+}
+
+async function removeNote(n){
+ try{
+  if(store.kind==="db")await queue(n.id,()=>store.coll.doc(n.id).delete());
+  else{const map=readLocal();delete map[n.id];writeLocal(map)}
+ }catch(e){toast("Couldn’t delete — try again");return}
+ closeTab(n.id,true);delete NOTES[n.id];
+ if(!active)active=tabs[0]||null;
+ renderAll();toast("Note deleted");
+}
+async function resetCourse(n){
+ n.body=DEFAULTS[n.id];n.customized=false;n.dirty=true;n.ver++;
+ await persist(n);renderAll();toast("Reset to course text");
+}
+
+/* ---------- export ---------- */
+function frontmatter(n){
+ const lines=["---",`title: ${JSON.stringify(n.title)}`,`type: ${n.kind==="course"?"course":"personal"}`];
+ if(n.lessonId)lines.push(`lesson: ${JSON.stringify(n.lessonId)}`,`module: ${n.module}`);
+ lines.push("tags: [nox]","---","");return lines.join("\n");
+}
+function safeName(s){return s.replace(/[\\/:*?"<>|]/g,"-").replace(/\s+/g," ").trim()}
+
+const enc=new TextEncoder();
+function crc32(u8){let crc=0xFFFFFFFF;for(let i=0;i<u8.length;i++){crc^=u8[i];for(let k=0;k<8;k++)crc=(crc&1)?((crc>>>1)^0xEDB88320):(crc>>>1)}return (crc^0xFFFFFFFF)>>>0}
+function makeZip(files){
+ const parts=[],central=[];let offset=0;
+ files.forEach(f=>{
+  const nameB=enc.encode(f.name),bytes=f.bytes,crc=crc32(bytes),size=bytes.length;
+  const lh=new Uint8Array(30+nameB.length),lv=new DataView(lh.buffer);
+  lv.setUint32(0,0x04034b50,true);lv.setUint16(4,20,true);lv.setUint16(6,0x0800,true);lv.setUint16(8,0,true);
+  lv.setUint16(10,0,true);lv.setUint16(12,33,true);lv.setUint32(14,crc,true);lv.setUint32(18,size,true);lv.setUint32(22,size,true);
+  lv.setUint16(26,nameB.length,true);lv.setUint16(28,0,true);lh.set(nameB,30);
+  parts.push(lh,bytes);
+  const ch=new Uint8Array(46+nameB.length),cv=new DataView(ch.buffer);
+  cv.setUint32(0,0x02014b50,true);cv.setUint16(4,20,true);cv.setUint16(6,20,true);cv.setUint16(8,0x0800,true);cv.setUint16(10,0,true);
+  cv.setUint16(12,0,true);cv.setUint16(14,33,true);cv.setUint32(16,crc,true);cv.setUint32(20,size,true);cv.setUint32(24,size,true);
+  cv.setUint16(28,nameB.length,true);cv.setUint16(30,0,true);cv.setUint16(32,0,true);cv.setUint16(34,0,true);cv.setUint16(36,0,true);
+  cv.setUint32(38,0,true);cv.setUint32(42,offset,true);ch.set(nameB,46);
+  central.push(ch);offset+=lh.length+size;
+ });
+ const cdSize=central.reduce((a,c)=>a+c.length,0);
+ const end=new Uint8Array(22),ev=new DataView(end.buffer);
+ ev.setUint32(0,0x06054b50,true);ev.setUint16(8,files.length,true);ev.setUint16(10,files.length,true);
+ ev.setUint32(12,cdSize,true);ev.setUint32(16,offset,true);
+ return new Blob([...parts,...central,end],{type:"application/zip"});
+}
+
+async function save(filename,data){
+ const dl=store&&store.dl;
+ if(!dl){toast("Downloads aren’t available in this view");return}
+ try{await dl.save({filename,data});toast("Saved “"+filename+"”")}
+ catch(e){if(e&&e.code==="declined")return;toast(e&&e.code==="too_large"?"File is too large to save":"Couldn’t save the file")}
+}
+function exportNote(n){save(safeName(n.title)+".md",frontmatter(n)+n.body)}
+function exportVault(){
+ const files=Object.values(NOTES).map(n=>({name:`${safeName(n.folder)}/${safeName(n.title)}.md`,bytes:enc.encode(frontmatter(n)+n.body)}));
+ save("nox-notes.zip",makeZip(files));
+}
+
+/* ---------- quick open ---------- */
+let qSel=0,qItems=[];
+function openQuick(){$("#qmodal").classList.add("open");$("#qin").value="";qSel=0;renderQuick();$("#qin").focus()}
+function closeQuick(){$("#qmodal").classList.remove("open")}
+function renderQuick(){
+ const q=$("#qin").value.trim().toLowerCase();
+ qItems=Object.values(NOTES).filter(n=>!q||n.title.toLowerCase().includes(q)||n.folder.toLowerCase().includes(q)).sort((a,b)=>a.title.localeCompare(b.title)).slice(0,30);
+ $("#qlist").innerHTML=qItems.length?qItems.map((n,i)=>`<button class="${i===qSel?"sel":""}" data-qopen="${n.id}"><span>${esc(n.title)}</span><small>${esc(n.folder)}</small></button>`).join(""):`<div class="none">No notes match. Press Enter to create “${esc($("#qin").value.trim())}”.</div>`;
+}
+
+/* ---------- toast ---------- */
+function toast(m){const t=$("#toast");t.textContent=m;t.style.opacity=1;clearTimeout(toast.k);toast.k=setTimeout(()=>t.style.opacity=0,2000)}
+
+/* ---------- events ---------- */
+document.addEventListener("click",e=>{
+ const t=e.target;
+ if(t.closest("#emptyNew")||t.closest("[data-new]")){createNote("Untitled");return}
+ const cl=t.closest("[data-close]");if(cl){e.stopPropagation();closeTab(cl.dataset.close);return}
+ const tab=t.closest("[data-tab]");if(tab){open(tab.dataset.tab,false);return}
+ const oc=t.closest("[data-open]");if(oc){e.preventDefault();open(oc.dataset.open);$("#ws").classList.remove("show-l");return}
+ const cr=t.closest("[data-create]");if(cr){e.preventDefault();createNote(cr.dataset.create);return}
+ const hd=t.closest("[data-hd]");if(hd){jumpTo(+hd.dataset.line);return}
+ const fo=t.closest("[data-folder]");if(fo){const k=fo.dataset.folder;collapsed.has(k)?collapsed.delete(k):collapsed.add(k);renderTree();return}
+ const ck=t.closest("[data-task]");if(ck){toggleTask(+ck.dataset.task);return}
+ const md=t.closest("[data-mode]");if(md){setMode(md.dataset.mode);return}
+ const fa=t.closest("[data-act]");if(fa){formatAct(fa.dataset.act);return}
+ const qo=t.closest("[data-qopen]");if(qo){closeQuick();open(qo.dataset.qopen);return}
+ if(t.closest("#qmodal")&&t.id==="qmodal"){closeQuick();return}
+ if(t.closest("#expBtn")){const m=$("#menu"),o=!m.classList.contains("open");m.classList.toggle("open",o);$("#expBtn").setAttribute("aria-expanded",o);return}
+ if(!t.closest("#exp")){$("#menu").classList.remove("open");$("#expBtn").setAttribute("aria-expanded",false)}
+ if(t.closest("#expNote")){$("#menu").classList.remove("open");if(active)exportNote(NOTES[active]);return}
+ if(t.closest("#expVault")){$("#menu").classList.remove("open");exportVault();return}
+ if(t.closest("#resetNote")){$("#menu").classList.remove("open");resetCourse(NOTES[active]);return}
+ if(t.closest("#delNote")){const b=$("#delNote");if(b.dataset.arm){b.dataset.arm="";$("#menu").classList.remove("open");removeNote(NOTES[active])}else{b.dataset.arm=1;b.textContent="Click again to delete";setTimeout(()=>{b.dataset.arm="";b.textContent="Delete note"},3000)}return}
+ if(t.closest("#newBtn")){createNote("Untitled");return}
+ if(t.closest("#qbtn")){openQuick();return}
+ if(t.closest("#tglL")){const ws=$("#ws");if(innerWidth<=760)ws.classList.toggle("show-l");else{const on=!ws.classList.contains("no-l");ws.classList.toggle("no-l",on);$("#tglL").setAttribute("aria-pressed",!on)}return}
+ if(t.closest("#tglR")){const ws=$("#ws"),on=!ws.classList.contains("no-r");ws.classList.toggle("no-r",on);$("#tglR").setAttribute("aria-pressed",!on);return}
+ if(t.closest("#home")){e.preventDefault();location.href=APP_URL;return}
+ if(t.closest("#netstate")){location.href=PORTAL_URL;return}
+ const jl=t.closest("[data-jump-lesson]");
+ if(jl){
+  try{
+   let nv=JSON.parse(localStorage.getItem("nox-v2")||"{}");
+   nv.v="lesson";
+   nv.k=jl.dataset.jumpLesson;
+   localStorage.setItem("nox-v2",JSON.stringify(nv));
+  }catch(err){}
+  location.href=APP_URL;
+  return;
+ }
+});
+
+function jumpTo(line){
+ const n=NOTES[active];if(!n)return;
+ const ed=$("#ed");const pos=n.body.split("\n").slice(0,line).join("\n").length+(line?1:0);
+ if(mode!=="read"){ed.focus();ed.setSelectionRange(pos,pos)}
+ const pv=document.querySelectorAll("#pv [id^=hd-]");const idx=headingsOf(n.body).findIndex(h=>h.line===line);
+ if(pv[idx])pv[idx].scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"});
+}
+function toggleTask(line){
+ const n=NOTES[active];if(!n)return;
+ const lines=n.body.split("\n");
+ lines[line]=lines[line].replace(/\[( |x|X)\]/,m=>m===("[ ]")?"[x]":"[ ]");
+ setBody(n,lines.join("\n"));renderEditor();
+}
+
+$("#ed").addEventListener("input",e=>{if(active)setBody(NOTES[active],e.target.value)});
+$("#ed").addEventListener("keydown",e=>{
+ const mod=e.ctrlKey||e.metaKey;if(!mod)return;
+ const k=e.key.toLowerCase();
+ if(k==="b"){e.preventDefault();formatAct("bold")}
+ else if(k==="i"){e.preventDefault();formatAct("italic")}
+ else if(k==="l"){e.preventDefault();formatAct("wiki")}
+});
+$("#ttl").addEventListener("change",e=>{if(active&&NOTES[active].kind==="personal")renameNote(NOTES[active],e.target.value)});
+$("#ttl").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();e.target.blur()}});
+$("#search").addEventListener("input",e=>{searchQ=e.target.value;renderTree()});
+$("#qin").addEventListener("input",()=>{qSel=0;renderQuick()});
+$("#qin").addEventListener("keydown",e=>{
+ if(e.key==="ArrowDown"){e.preventDefault();qSel=Math.min(qItems.length-1,qSel+1);renderQuick()}
+ else if(e.key==="ArrowUp"){e.preventDefault();qSel=Math.max(0,qSel-1);renderQuick()}
+ else if(e.key==="Enter"){e.preventDefault();closeQuick();if(qItems[qSel])open(qItems[qSel].id);else{const v=$("#qin").value.trim();if(v)createNote(v)}}
+ else if(e.key==="Escape"){closeQuick()}
+});
+document.addEventListener("keydown",e=>{
+ const mod=e.ctrlKey||e.metaKey,k=e.key.toLowerCase();
+ if(mod&&k==="o"){e.preventDefault();openQuick()}
+ else if(mod&&k==="n"){e.preventDefault();createNote("Untitled")}
+ else if(mod&&k==="e"){e.preventDefault();setMode(mode==="edit"?"split":mode==="split"?"read":"edit")}
+ else if(mod&&k==="w"&&active){e.preventDefault();closeTab(active)}
+ else if(e.key==="Escape"){closeQuick();$("#menu").classList.remove("open")}
+});
+window.addEventListener("beforeunload",e=>{if(Object.values(NOTES).some(n=>n.dirty)){e.preventDefault();e.returnValue=""}});
+
+/* ---------- start ---------- */
+renderAll();
+connect();
+</script>
+</body>
+</html>

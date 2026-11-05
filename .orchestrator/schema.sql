@@ -1,0 +1,25 @@
+CREATE TABLE IF NOT EXISTS audit_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    check_type TEXT NOT NULL,
+    status TEXT NOT NULL,
+    details TEXT
+);
+
+CREATE TABLE IF NOT EXISTS backup_registry (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    filename TEXT NOT NULL,
+    file_size_bytes INTEGER NOT NULL,
+    sha256_hash TEXT NOT NULL,
+    cloud_synced BOOLEAN DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS agent_proposals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    agent_name TEXT NOT NULL,
+    target_file TEXT NOT NULL,
+    diff_path TEXT NOT NULL,
+    status TEXT DEFAULT 'PENDING'
+);

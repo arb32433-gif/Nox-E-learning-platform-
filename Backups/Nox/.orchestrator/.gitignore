@@ -1,0 +1,14 @@
+# Local runtime database and SQLite side files
+state.db
+state.db-journal
+state.db-wal
+state.db-shm
+
+# Temporary runtime storage, keeping directory anchors
+storage/backups/*
+storage/logs/*
+storage/diffs/*
+
+!storage/backups/.gitkeep
+!storage/logs/.gitkeep
+!storage/diffs/.gitkeep
