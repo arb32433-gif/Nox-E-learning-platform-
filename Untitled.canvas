@@ -1,0 +1,14 @@
+{
+	"nodes":[
+		{"id":"79e12860e96232f6","type":"text","text":"Picks a module","x":180,"y":-73,"width":250,"height":60},
+		{"id":"d1f8a1cb517fb8c6","type":"text","text":"Picks a module","x":180,"y":140,"width":250,"height":60},
+		{"id":"40e7096e2e1fed71","type":"text","text":"Learn and Innovate","x":560,"y":20,"width":250,"height":60},
+		{"id":"b4b2151abc11ede3","type":"text","text":"User signs in","x":-240,"y":20,"width":250,"height":60}
+	],
+	"edges":[
+		{"id":"2f3d7a96b0b34ecc","fromNode":"b4b2151abc11ede3","fromSide":"right","toNode":"79e12860e96232f6","toSide":"left"},
+		{"id":"5b2febeed1768dc5","fromNode":"79e12860e96232f6","fromSide":"right","toNode":"40e7096e2e1fed71","toSide":"left"},
+		{"id":"8a2d161782128bc7","fromNode":"b4b2151abc11ede3","fromSide":"right","toNode":"d1f8a1cb517fb8c6","toSide":"left"},
+		{"id":"5e7c618acd985d43","fromNode":"d1f8a1cb517fb8c6","fromSide":"right","toNode":"40e7096e2e1fed71","toSide":"left"}
+	]
+}

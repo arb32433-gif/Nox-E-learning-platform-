@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<title>Nox – Learn to run AI agents</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter+Tight:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0f14;--bg2:#111d27;--panel:#121a22;--line:#1f2b36;--ink:#dbe6dc;--mute:#8d9a94;--or:#ff5b35;--mint:#c6dac9;color-scheme:dark;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.6 "Inter Tight",system-ui,-apple-system,"Segoe UI",sans-serif;overflow-x:hidden}
+a{color:inherit}
+button,a.btn{font:inherit}
+.disp{font-family:"Barlow Condensed","Arial Narrow",sans-serif}
+:focus-visible{outline:2px solid var(--mint);outline-offset:3px}
+
+/* opening: logo intro curtain */
+.intro{position:fixed;inset:0;z-index:50;background:var(--bg2);display:grid;place-items:center;transition:transform .9s cubic-bezier(.7,0,.2,1)}
+.intro svg,.intro img{width:120px;height:120px;object-fit:contain}
+.intro img{animation:introGlow 1.6s cubic-bezier(.16,1,.3,1) forwards .15s;filter:drop-shadow(0 0 35px rgba(255,91,53,.35)) drop-shadow(0 0 15px rgba(198,218,201,.5))}
+@keyframes introGlow{0%{opacity:0;transform:scale(.75)}45%{opacity:1;transform:scale(1.04)}100%{opacity:1;transform:scale(1)}}
+.intro path{stroke-dasharray:160;stroke-dashoffset:160;animation:draw 1.3s ease forwards .2s}
+.intro path+path{animation-delay:.55s}
+.intro-done .intro{transform:translateY(-100%)}
+@keyframes draw{to{stroke-dashoffset:0}}
+
+/* closing: curtain on enter */
+.curtain{position:fixed;inset:0;z-index:60;background:var(--bg2);display:grid;place-items:center;transform:translateY(100%);transition:transform .7s cubic-bezier(.7,0,.2,1);pointer-events:none}
+.curtain p{font-family:"Barlow Condensed",sans-serif;font-size:clamp(40px,8vw,88px);letter-spacing:.02em;color:var(--mint);margin:0;opacity:0;transition:opacity .4s .3s}
+.leaving .curtain{transform:translateY(0);pointer-events:auto}
+.leaving .curtain p{opacity:1}
+
+header{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:18px clamp(20px,5vw,64px);backdrop-filter:blur(10px);background:linear-gradient(var(--bg),rgba(11,15,20,.6));transition:padding .3s}
+header.scrolled{padding-block:12px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;font-weight:800;font-size:22px;letter-spacing:-.03em}
+.brand svg,.brand img{width:34px;height:34px;object-fit:contain;transition:transform .5s cubic-bezier(.3,1.6,.5,1)}
+.brand:hover svg,.brand:hover img{transform:rotate(-12deg) scale(1.08)}
+nav.top{display:flex;gap:26px;align-items:center;font-size:14px}
+nav.top a{text-decoration:none;color:var(--mute);position:relative;transition:color .2s}
+nav.top a::after{content:"";position:absolute;left:0;bottom:-6px;height:1px;width:100%;background:var(--or);transform:scaleX(0);transform-origin:left;transition:transform .3s}
+nav.top a:hover{color:var(--ink)}
+nav.top a:hover::after{transform:scaleX(1)}
+@media(max-width:720px){nav.top a:not(.btn){display:none}}
+
+.btn{display:inline-flex;align-items:center;gap:10px;background:var(--or);color:#0b0f14;border:0;border-radius:8px;padding:13px 22px;font-weight:700;text-decoration:none;cursor:pointer;position:relative;overflow:hidden;transition:transform .25s,box-shadow .25s}
+.btn::before{content:"";position:absolute;top:0;left:-75%;width:50%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.45),transparent);transform:skewX(-20deg);animation:sweep 3.6s ease-in-out infinite}
+.btn span.arr{display:inline-block;transition:transform .25s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 12px 30px -8px rgba(255,91,53,.55)}
+.btn:hover span.arr{transform:translateX(5px)}
+.btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+.btn.ghost::before{display:none}
+.btn.ghost:hover{box-shadow:inset 0 0 0 1px var(--mint);transform:translateY(-2px)}
+@keyframes sweep{0%,60%{left:-75%}100%{left:125%}}
+
+/* hero */
+.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:130px clamp(20px,5vw,64px) 90px;isolation:isolate}
+#net{position:absolute;inset:0;width:100%;height:100%;z-index:-1;opacity:.85}
+.hero::after{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(ellipse at 70% 40%,transparent 0,var(--bg) 75%)}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:13px;color:var(--mute);border:1px solid var(--line);border-radius:30px;padding:6px 14px;width:fit-content;margin:0 0 26px;animation:rise .8s .3s both}
+.eyebrow i{width:7px;height:7px;border-radius:50%;background:var(--or);box-shadow:0 0 0 0 rgba(255,91,53,.6);animation:ping 1.8s infinite}
+@keyframes ping{0%{box-shadow:0 0 0 0 rgba(255,91,53,.6)}70%,100%{box-shadow:0 0 0 10px rgba(255,91,53,0)}}
+h1{font-size:clamp(54px,9vw,128px);line-height:.9;letter-spacing:-.045em;font-weight:800;margin:0 0 26px;animation:rise .9s .45s both}
+h1 .l1{display:block;color:var(--ink)}
+h1 .l2{display:block;color:var(--mint);min-height:1.05em}
+.caret{display:inline-block;width:.06em;height:.8em;background:var(--or);margin-left:.06em;vertical-align:-.05em;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.sub{font-size:clamp(17px,1.8vw,20px);color:var(--mute);max-width:52ch;margin:0 0 36px;animation:rise .9s .6s both}
+.ctas{display:flex;gap:14px;flex-wrap:wrap;animation:rise .9s .75s both}
+@keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+
+.ticker{border-block:1px solid var(--line);overflow:hidden;white-space:nowrap;background:var(--panel)}
+.ticker div{display:inline-flex;gap:38px;padding:16px 0;animation:scroll 28s linear infinite;font-family:"Barlow Condensed",sans-serif;font-size:22px;letter-spacing:.04em;color:var(--mute);text-transform:uppercase}
+.ticker b{color:var(--or);font-weight:600}
+@keyframes scroll{to{transform:translateX(-50%)}}
+
+section{padding:clamp(70px,10vw,120px) clamp(20px,5vw,64px);max-width:1220px;margin:0 auto}
+.kicker{font-family:"Barlow Condensed",sans-serif;font-size:18px;letter-spacing:.08em;text-transform:uppercase;color:var(--or);margin:0 0 12px}
+h2{font-size:clamp(36px,5vw,64px);line-height:1;letter-spacing:-.035em;margin:0 0 18px;font-weight:800}
+.lead{color:var(--mute);max-width:60ch;margin:0 0 48px}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-top:10px}
+.stat{border-left:2px solid var(--line);padding-left:20px;transition:border-color .3s}
+.stat:hover{border-color:var(--or)}
+.stat b{display:block;font-family:"Barlow Condensed",sans-serif;font-size:clamp(56px,7vw,88px);line-height:.9;color:var(--mint)}
+.stat span{color:var(--mute);font-size:14px}
+
+.who{display:flex;flex-wrap:wrap;gap:12px}
+.chip{border:1px solid var(--line);border-radius:40px;padding:14px 22px;font-size:16px;background:var(--panel);transition:transform .3s cubic-bezier(.3,1.6,.5,1),border-color .25s,color .25s;cursor:default;opacity:0;transform:translateY(16px)}
+.chip.in{opacity:1;transform:none}
+.chip:hover{transform:translateY(-4px);border-color:var(--or);color:var(--or)}
+
+.mods{display:grid;gap:14px}
+.mod{display:grid;grid-template-columns:auto 1fr auto;gap:28px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:28px 32px;position:relative;overflow:hidden;transition:transform .35s,border-color .3s;opacity:0;transform:translateX(-24px)}
+.mod.in{opacity:1;transform:none;transition:opacity .7s,transform .7s cubic-bezier(.2,.7,.2,1),border-color .3s}
+.mod::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--or);transform:scaleY(0);transform-origin:top;transition:transform .45s cubic-bezier(.2,.7,.2,1)}
+.mod:hover{border-color:#2a3a47;transform:translateX(6px)}
+.mod:hover::before{transform:scaleY(1)}
+.mod .no{font-family:"Barlow Condensed",sans-serif;font-size:72px;line-height:.85;color:var(--mint)}
+.mod h3{margin:0 0 6px;font-size:24px;letter-spacing:-.02em}
+.mod p{margin:0;color:var(--mute);font-size:15px}
+.mod .arrow{font-size:28px;color:var(--mute);transition:transform .35s,color .3s}
+.mod:hover .arrow{transform:translateX(6px);color:var(--or)}
+@media(max-width:640px){.mod{grid-template-columns:1fr;gap:12px}.mod .arrow{display:none}}
+
+.cta{text-align:left;background:linear-gradient(135deg,var(--bg2),var(--panel));border:1px solid var(--line);border-radius:16px;padding:clamp(36px,6vw,72px);position:relative;overflow:hidden}
+.cta::after{content:"";position:absolute;right:-120px;top:-120px;width:340px;height:340px;border-radius:50%;border:1px solid rgba(198,218,201,.15);animation:spin 40s linear infinite}
+.cta::before{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;border:1px dashed rgba(255,91,53,.35);animation:spin 26s linear infinite reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+.cta h2{max-width:14ch;position:relative}
+.cta .lead{position:relative;margin-bottom:30px}
+
+footer{border-top:1px solid var(--line);padding:34px clamp(20px,5vw,64px);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;color:var(--mute);font-size:14px}
+footer .brand{font-size:18px;color:var(--ink)}
+footer .brand svg,footer .brand img{width:26px;height:26px;object-fit:contain}
+
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}#net{display:none}}
+</style>
+</head>
+<body>
+
+<div class="intro" aria-hidden="true">
+  <img src="assets/nox-logo.png" alt="Nox Logo" width="120" height="120">
+</div>
+<div class="curtain" aria-hidden="true"><p>Entering Nox…</p></div>
+
+<header id="top">
+  <a class="brand" href="#top" aria-label="Nox home">
+    <img src="assets/nox-logo.png" alt="Nox Logo" width="34" height="34">
+    Nox
+  </a>
+  <nav class="top" aria-label="Main">
+    <a href="#modules">Modules</a>
+    <a href="#who">Who it's for</a>
+    <a href="Nox Portal – Sign in.html" class="btn" data-enter>Enter Nox <span class="arr">→</span></a>
+  </nav>
+</header>
+
+<div class="hero">
+  <canvas id="net" aria-hidden="true"></canvas>
+  <span class="eyebrow"><i></i>Agentic Orchestration · Self-paced</span>
+  <h1><span class="l1">Learn to run</span><span class="l2" id="typed" aria-live="polite"></span></h1>
+  <p class="sub">Nox teaches you how teams of AI agents get real work done. Short lessons, plain language, and practice that fits your job, whether you code or not.</p>
+  <div class="ctas">
+    <a class="btn" href="Nox Portal – Sign in.html" data-enter>Enter Nox <span class="arr">→</span></a>
+    <a class="btn ghost" href="#modules">Explore modules</a>
+  </div>
+</div>
+
+<div class="ticker" aria-hidden="true"><div>
+  <span>Tool use</span><b>✦</b><span>Handoffs</span><b>✦</b><span>MCP</span><b>✦</b><span>Guardrails</span><b>✦</b><span>Human-in-the-loop</span><b>✦</b><span>Memory</span><b>✦</b><span>Testing</span><b>✦</b><span>Ship a workflow</span><b>✦</b>
+  <span>Tool use</span><b>✦</b><span>Handoffs</span><b>✦</b><span>MCP</span><b>✦</b><span>Guardrails</span><b>✦</b><span>Human-in-the-loop</span><b>✦</b><span>Memory</span><b>✦</b><span>Testing</span><b>✦</b><span>Ship a workflow</span><b>✦</b>
+</div></div>
+
+<section>
+  <p class="kicker">Why Nox</p>
+  <h2>Small lessons.<br>Real work.</h2>
+  <p class="lead">Every lesson ends with something you can try on your own work the same day.</p>
+  <div class="stats">
+    <div class="stat"><b data-count="3">0</b><span>modules, from foundations to shipping</span></div>
+    <div class="stat"><b data-count="9">0</b><span>lessons with a try-it exercise</span></div>
+    <div class="stat"><b data-count="0">0</b><span>lines of code needed to start</span></div>
+  </div>
+</section>
+
+<section id="who">
+  <p class="kicker">Who it's for</p>
+  <h2>Built for people<br>who do the work.</h2>
+  <p class="lead">Developers, VAs, designers, business owners and students all start in the same place.</p>
+  <div class="who">
+    <span class="chip">Developers</span><span class="chip">Virtual assistants</span><span class="chip">Designers</span><span class="chip">Business owners</span><span class="chip">Students</span>
+  </div>
+</section>
+
+<section id="modules">
+  <p class="kicker">The path</p>
+  <h2>Three modules.<br>Nine lessons.</h2>
+  <p class="lead">Start with the foundations, then move on to safe deployment, then build a workflow you can keep using.</p>
+  <div class="mods">
+    <a class="mod" href="Nox Portal – Sign in.html" data-enter data-mod="0"><div class="no">01</div><div><h3>Foundations &amp; handoffs</h3><p>How agents think, use tools, and pass work along.</p></div><div class="arrow">→</div></a>
+    <a class="mod" href="Nox Portal – Sign in.html" data-enter data-mod="1"><div class="no">02</div><div><h3>Advanced deployment</h3><p>Guardrails and approval steps that keep agents under your control.</p></div><div class="arrow">→</div></a>
+    <a class="mod" href="Nox Portal – Sign in.html" data-enter data-mod="2"><div class="no">03</div><div><h3>Going further</h3><p>Memory, testing, and shipping your first working agent team.</p></div><div class="arrow">→</div></a>
+  </div>
+</section>
+
+<section id="start">
+  <div class="cta">
+    <p class="kicker">Ready when you are</p>
+    <h2>Step into the night.</h2>
+    <p class="lead">Nox is free to explore. Sign in later to keep your progress across devices.</p>
+    <a class="btn" href="Nox Portal – Sign in.html" data-enter>Enter Nox <span class="arr">→</span></a>
+  </div>
+</section>
+
+<footer>
+  <a class="brand" href="#top"><img src="assets/nox-logo.png" alt="Nox Logo" width="26" height="26">Nox</a>
+  <span>Nox means night in Latin. Learn to run AI agents, one lesson at a time.</span>
+</footer>
+
+<script>
+const APP_URL="Nox Portal – Sign in.html";
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+
+// opening: intro curtain lifts after logo draws
+setTimeout(()=>document.body.classList.add("intro-done"),reduce?0:2300);
+
+// scroll header state
+addEventListener("scroll",()=>$("header").classList.toggle("scrolled",scrollY>30),{passive:true});
+
+// typed rotating headline (text generating loop)
+const words=["AI agent teams.","your daily workflows.","your own business.","a team that works for you."];
+const typed=$("#typed");let w=0,c=0,del=false;
+function tick(){const word=words[w];
+ if(!del){c++;typed.textContent=word.slice(0,c);
+  if(c===word.length){del=true;return setTimeout(tick,1800)}
+  return setTimeout(tick,60+Math.random()*50)}
+ c--;typed.textContent=word.slice(0,c);
+ if(c===0){del=false;w=(w+1)%words.length;return setTimeout(tick,350)}
+ setTimeout(tick,28)}
+if(reduce)typed.textContent=words[0];else setTimeout(tick,2000);
+
+// count-up stats and reveal on scroll
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;const el=e.target;
+ if(el.classList.contains("stat")){const b=el.querySelector("b"),t=+b.dataset.count;
+  if(reduce){b.textContent=t;}else{let n=0;const step=()=>{n=Math.min(t,n+Math.max(1,Math.ceil(t/20)));b.textContent=n;if(n<t)setTimeout(step,50)};step()}}
+ el.classList.add("in");io.unobserve(el)}),{threshold:.4});
+$$(".stat").forEach(el=>io.observe(el));
+const io2=new IntersectionObserver(es=>es.forEach((e,i)=>{if(e.isIntersecting){e.target.classList.add("in");io2.unobserve(e.target)}}),{threshold:.3});
+$$(".mod").forEach((el,i)=>{el.style.transitionDelay=(i*0.12)+"s";io2.observe(el)});
+const io3=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){$$(".chip").forEach((c,i)=>setTimeout(()=>c.classList.add("in"),i*90));io3.disconnect()}}),{threshold:.3});
+io3.observe($("#who"));
+
+// network canvas: drifting nodes with links (looping)
+const cv=$("#net"),cx=cv.getContext("2d");let W,H,nodes=[];
+function size(){const r=cv.getBoundingClientRect(),d=Math.min(devicePixelRatio,2);W=r.width;H=r.height;cv.width=W*d;cv.height=H*d;cx.setTransform(d,0,0,d,0,0);
+ const n=Math.round(Math.min(70,W*H/16000));nodes=Array.from({length:n},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.35,vy:(Math.random()-.5)*.35,o:Math.random()<.12}))}
+function frame(){cx.clearRect(0,0,W,H);
+ for(const n of nodes){n.x+=n.vx;n.y+=n.vy;if(n.x<0||n.x>W)n.vx*=-1;if(n.y<0||n.y>H)n.vy*=-1}
+ for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){const a=nodes[i],b=nodes[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy);
+  if(d<150){cx.strokeStyle=`rgba(198,218,201,${(1-d/150)*.22})`;cx.lineWidth=1;cx.beginPath();cx.moveTo(a.x,a.y);cx.lineTo(b.x,b.y);cx.stroke()}}
+ for(const n of nodes){cx.fillStyle=n.o?"#ff5b35":"#c6dac9";cx.beginPath();cx.arc(n.x,n.y,n.o?2.6:1.6,0,Math.PI*2);cx.fill()}
+ if(!reduce)requestAnimationFrame(frame)}
+size();frame();addEventListener("resize",()=>{size();if(reduce)frame()});
+
+// closing: curtain then go into the app
+function enter(e){
+  e.preventDefault();
+  const mod = e.currentTarget.dataset.mod;
+  if(mod !== undefined){
+    try{
+      let nv = JSON.parse(localStorage.getItem("nox-v2") || "{}");
+      nv.m = +mod;
+      nv.v = "module";
+      localStorage.setItem("nox-v2", JSON.stringify(nv));
+    }catch(err){}
+  }
+  document.body.classList.add("leaving");
+  setTimeout(()=>{location.href=APP_URL},reduce?0:900);
+}
+$$("[data-enter]").forEach(a=>a.addEventListener("click",enter));
+</script>
+</body>
+</html>
